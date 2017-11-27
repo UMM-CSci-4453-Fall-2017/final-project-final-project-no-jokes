@@ -1,9 +1,13 @@
 <html>
 	<div class="container">
-            <div class="toppane">Test Page</div>
-            <div class="leftpane"><h1>Test Page</h1></div>
-            <div class="middlepane">Test Page</div>
-            <div class="rightpane"><h1>Test Page</h1></div>
+            <div class="toppane">Top</div>
+            <div class="leftpane"><h1>Left</h1></div>
+	    <div>
+           	 <div class="middlepane-image">Images</div>
+	   	 <div class="middlepane-text">Text</div>
+	   	 <div class="middlepane-options">Options</div>
+	    </div>
+            <div class="rightpane"><h1>Right</h1></div>
 	</div>
 
 <style>
@@ -19,25 +23,44 @@
 }
 
 .leftpane {
-    width: 25%;
+    width: 15%;
     height: 100%;
     float: left;
-    background-color: rosybrown;
+    background-color: purple;
     border-collapse: collapse;
 }
 
-.middlepane {
-    width: 50%;
-    height: 100%;
+.middlepane-image {
+    width: 70%;
+    height: 50%;
     float: left;
     background-color: royalblue;
     border-collapse: collapse;
 }
 
+.middlepane-text {
+    width: 70%;
+    height: 25%;
+    float: left;
+    background-color: red;
+    border-collapse: collapse;
+}
+
+.middlepane-options {
+    width: 70%;
+    height: 25%;
+    float: left;
+    background-color: green;
+    border-collapse: collapse;
+}
+
+
 .rightpane {
-  width: 25%;
+  width: 15%;
+  right: 0%;
+  top: 100px;
   height: 100%;
-  position: relative;
+  position: absolute;
   float: right;
   background-color: yellow;
   border-collapse: collapse;
