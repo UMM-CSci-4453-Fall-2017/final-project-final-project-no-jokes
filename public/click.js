@@ -1,262 +1,132 @@
-angular.module('register',[])
-  .controller('registerCtrl',RegisterCtrl)
-  .factory('registerApi',registerApi)
-  .constant('apiUrl','http://localhost:1337'); // CHANGED for the lab 2017!
+angular.module('gameState',[])
+  .controller('gameStateCtrl',GameStateCtrl)
+  .factory('gameStateApi',gameStateApi)
+  .constant('apiUrl','http://localhost:1337'); 
 
-function RegisterCtrl($scope,registerApi){
-   $scope.totalCost=totalCost;
-   $scope.buttons=[]; //Initially all was still
-   $scope.order=[];
-   $scope.users=[];
-   $scope.errorMessage='';
-   $scope.isLoading=isLoading;
-   $scope.refreshButtons=refreshButtons;
-   $scope.buttonClick=buttonClick;
-   $scope.orderID = 0;
-   $scope.removePurchase=removePurchase;
-   $scope.completeTransaction=completeTransaction;
-   $scope.voidTransaction=voidTransaction;
-   $scope.personLoggedIn=personLoggedIn;
-   $scope.firstname="";
-   $scope.lastname="";
-   $scope.finalCost=0;
-   $scope.addNewUser=addNewUser;
-   $scope.receiptNumber=1;
-   $scope.logOut=logOut;
+function GameStateCtrl($scope,registerApi){
+
+   $scope.classEvents=[]; //Stores eventID for the corresponding
+   $scope.freeEvents=[];  //Event in the database
+   $scope.username="No one";
+   $scope.password="N/A"
+   //$scope.newCharacter=-1; //0 means they choose to login, 1 means they choose to make a new character
+   $scope.characterInformation=characterInformation;
+   $scope.characterInventory=characterInventory;
+   $scope.userID=-1;
+   $scope.isLoggedIn=false;
 
    var loading = false;
 
    function isLoading(){
-    return loading;
+    	return loading;
    }
 
-  function refreshButtons(){
-    loading=true;
-    $scope.errorMessage='';
-    registerApi.getButtons()
-      .success(function(data){
-         $scope.buttons=data;
-         loading=false;
-      })
-      .error(function () {
-          $scope.errorMessage="Unable to load Buttons:  Database request failed";
-          loading=false;
-      });
-  }
- 
- 
-  //checks credentials against the list of allowed users to let 
-  function personLoggedIn() {
+   function getClassEvents() {
+	loading=true;
 	$scope.errorMessage='';
-	  loading = true;
-	  var loggedIn = false; 
+	GameStateApi.getClassEvents()
+	   .success(function(data) {
+		   scope.classEvents=data;
+		   loading=false;
+	   })
+	   .error(function() {
+		   $scope.errorMessage="Unable to get events: Database request failed";
+		   loading=false;
+	   });
+   }
 
-	registerApi.logIn($scope.username, $scope.password)
+
+   function getFreeEvents() {
+        loading=true;
+        $scope.errorMessage='';
+        GameStateApi.getFreeEvents()
+           .success(function(data) {
+                   scope.freeEvents=data;
+                   loading=false;
+           })
+           .error(function() {
+                   $scope.errorMessage="Unable to get events: Database request failed";
+                   loading=false;
+           });
+   }
+
+   function getCharacterInformation(userID) {
+	loading=true;
+	$scope.errorMessage='';
+	GameStateApi.getCharacterInformation(userID)
+	   .success(function(data) {
+		   scope.characterInformation=data;
+		   loading=false;
+	   })
+	   .error(function() {
+		   $scope.errorMessage="Unable to get character information: Database request failed";
+		   loading=false;
+	   });
+   }
+
+   function getCharacterInventory(userID) {
+        loading=true;
+        $scope.errorMessage='';
+        GameStateApi.getCharacterInventory(userID)
+           .success(function(data) {
+                   scope.characterInventory=data;
+                   loading=false;
+           })
+           .error(function() {
+                   $scope.errorMessage="Unable to get character inventory: Database request failed";
+                   loading=false;
+           });
+   }
+
+   function login() {
+	$scope.errorMessage='';
+	loading = true;
+	var loggedIn = false; 
+
+	gameStateApi.login($scope.username, $scope.password)
 	  .success(function(data){
 		if(data.length == 1){
-			$scope.personLoggedIn = $scope.username;
+			$scope.userID=data.IDNumber;
 			loggedIn = true;
 			loading = false;
 		}
 	  })
 	  .error(function(){
-		$scope.errorMessage="error loading users: Database request failed";
+		$scope.errorMessage="invalid username or password: Database request failed";
 		  loading = false;
 	  });
 
-	  if(!loggedIn){
+	  if(!isloggedIn){
 		$scope.personLoggedIn = "Please Log In";
 	  }
-  }
+   }
 
-  function logOut() {
-	$scope.personLoggedIn = "Please Log In";
-  }
-
-	//if a button is clicked that isn't a special case, it will perform it's intended action
-  function buttonClick($event){
-     $scope.errorMessage='';
-	  if($event.target.id == -1){
-		personLoggedIn();
-	  } else if ($event.target.id == -2 && $scope.personLoggedIn != "Please Log In"){
-		addNewUser();
-	  } else {
-		 if ($scope.personLoggedIn != "Please Log In") {
-			refreshItems($event.target);
-		  }
-	  }
-  }
-
-  function addNewUser(){
-	  $scope.errorMessage='';
-	  loading = true;
-
-	registerApi.checkName($scope.username)
-          .success(function(data){
-                if(data.length == 0){
-			registerApi.addNewUser($scope.username, $scope.password)
-				.success(function(){
-					loading = false;
-				})
-				.error(function(){
-					$scope.errorMessage="error loading users: Database request failed - couldn't add user";
-					loading=false;
-				});
-                }
-          })
-          .error(function(){
-
-                $scope.errorMessage="error loading users: Database request failed - couldn't check username";
-                  loading = false;
-          });
-  }
-
-  //updates the order by adding new items if needed, or updating the quantity of existing items
-  function refreshItems(target){ 
- 	$scope.errorMessage='';
-	  var alreadyHasItem = false;
-
-	  for(items in $scope.order){
-		if(target.id == $scope.order[items].invID){
-			$scope.order[items].quantity++;
-			$scope.order[items].lastTime = Date.now();
-			alreadyHasItem = true;
-
-		}
-	  }
-
-	  var newItemPrice;
-	  var newItemLabel;
-	  for(button in $scope.buttons){
-		if((target.id-1) == button){
-			newItemPrice = $scope.buttons[button].prices;
-			newItemLabel = $scope.buttons[button].label;
-		}
-	  }
-
-
-
-	  if(!alreadyHasItem){
-		  $scope.order.push({"buttonID":$scope.orderID,"invID":target.id,"quantity":1,"prices":newItemPrice,"label":newItemLabel,"top":(($scope.order.length)*50)+150,"firstTime":Date.now(),"lastTime":Date.now()})
-		  $scope.orderID++;
-	  }
-   	  totalCost(); 
-  }
-
-	//calculates the total cost and formats it to 2 decimal places
-  function totalCost(){
-	  var cost = 0;
-	for(items in $scope.order){
-		for(button in $scope.buttons){
-			if(items.invID == button.invID){	
-				cost = cost + ($scope.order[items].quantity * $scope.buttons[button].prices);
-			}
-		}
-	}
-	$scope.finalCost = cost.toFixed(2);
-	$scope.totalCost = cost.toFixed(2);
-
-  }
-
-	//removes an item if it's button is clicked in the current transaction area
-  function removePurchase($event){
-
-	$scope.errorMessage='';
-	var itemRemoved = false;
-	for (items in $scope.order) {
-
-
-		if ($scope.order[items].invID == $event.target.id) {
-			$scope.order[items].quantity--;
-			if ($scope.order[items].quantity == 0)
-			{
-				$scope.order.splice(items, 1);
-				itemRemoved = true;
-			}
-		}
-	}
-	  if(itemRemoved){
-		for(items in $scope.order){
-			$scope.order[items].top=((items)*50)+150;
-		}
-	  }
-  	totalCost();
-  }
-
-	//completes the transaction and sends its relevant information to the database (updating till_inventory's amount and adding rows to till_sales)
-  function completeTransaction() {
-
-	  var firstButton = $scope.order[0].firstTime;
-	  var didsomething = false;
-	  var buttonPushed = Date.now();
-	$scope.receiptNumber=(Date.now() + Math.floor(Math.random() * 1000000));
-	for (item in $scope.order)
-	  {
-		  didsomething = true;
-		  if($scope.order[item].firstTime < firstButton){
-			firstButton = $scope.order[item].firstTime;
-		  }
-		registerApi.updateInventory($scope.order[item].invID, $scope.order[item].quantity,$scope.receiptNumber, $scope.personLoggedIn, $scope.order[item].firstTime, $scope.order[item].lastTime, $scope.finalCost)
-			.success(function(data){
- 	
-      			})
-		      .error(function () {
-          			$scope.errorMessage="Unable to load Users:  Database request failed";
-		      });
-
-	  }
-	  if(didsomething){
-		registerApi.updateInventory(-1, -1, $scope.receiptNumber, $scope.personLoggedIn, firstButton, buttonPushed, $scope.finalCost);
-	  	receiptPopup();
-		  voidTransaction();
-	  }
-  }
-
-	//voids the current transaction
-  function voidTransaction() {
-	$scope.order = [];
-	  $scope.orderID = 0;
-	  totalCost();
-  }
-
-  function receiptPopup() {
-	var itemHolder = [];
-	var tempItem = "";
-
-	  for(item in $scope.order){
-		tempItem = $scope.order[item].label+'\t-\t'+$scope.order[item].quantity;
-		  itemHolder[item] = tempItem;
-	  }
-	  itemHolder[itemHolder.length+1] = "Total Cost: $"+$scope.finalCost;
-	  alert(itemHolder.join("\n"));
-  }
-	refreshButtons();  //make sure the buttons are loaded
-	totalCost();  //make sure the total cost is initialized
-	personLoggedIn();
+   getClassEvents();
+   getFreeEvents();
 }
+function gameStateApi($http,apiUrl){
+  	return{
+    		getClassEvents: function(){
+      			var url = apiUrl + '/classEvents';
+      			return $http.get(url);
+    		},
+		getFreeEvents: function(){
+        		var url = apiUrl + '/freeEvents';
+        		return $http.get(url);
+    		},
+		getCharacterInformation: function(userID){
+			var url = apiUrl + '/getCharInfo?userID='+userID;
+			return $http.get(url);
+		},
+		getCharacterInventory: function(userID){
+			var url = apiUrl + '/getCharInventory?userID='+userID;
+			return $http.get(url);
+		},
+		login: function(username, password) {
+			var url = apiUrl + '/login?username='+username+'&password='+password;
+			return $http.get(url);
+		}
 
-function registerApi($http,apiUrl){
-  return{
-    getButtons: function(){
-      var url = apiUrl + '/buttons';
-      return $http.get(url);
-    },
-    updateInventory: function(invID, quantity, receiptNumber, user, firstTime, lastTime, finalCost)
-	  {
-		var url = apiUrl + '/update?invID='+invID+'&quantity='+quantity+'&receiptNumber='+receiptNumber+'&user='+user+'&firstTime='+firstTime+'&lastTime='+lastTime+'&finalCost='+finalCost;
-		return $http.get(url);
-	  },
-	  logIn: function(username, password) {
-		var url = apiUrl + '/login?username='+username+'&password='+password;
-		return $http.get(url);
-	  },
-	  checkName: function(username) {
-		var url = apiUrl + '/checkName?username='+username;
-		  return $http.get(url);
-	  },
-	  addNewUser: function(username, password){
-		var url = apiUrl + '/addNewUser?username='+username+'&password='+password;
-                return $http.get(url);
-	  }
+
  };
 }
