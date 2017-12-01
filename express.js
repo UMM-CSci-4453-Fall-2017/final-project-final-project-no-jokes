@@ -112,17 +112,18 @@ app.get("/newCharacter",function(req,res){
 
 app.get("/getCharInfo",function(req,res){
 	var IDNumber = req.param('userID');
-	var sql = 'SELECT XaiMarsh.fp_world_state.Firstname,XaiMarsh.fp_world_state.Lastname,XaiMarsh.fp_world_state.Dotw,XaiMarsh.fp_stats.FunFact,XaiMarsh.fp_stats.Intellect,XaiMarsh.fp_stats.CommitProficiency,XaiMarsh.fp_stats.CodeQuality,XaiMarsh.fp_stats.MaxFreeTime,XaiMarsh.fp_stats.GoogleProficiency,XaiMarsh.fp_grades.grade1,XaiMarsh.fp_grades.grade2,XaiMarsh.fp_grades.grade3,XaiMarsh.fp_grades.grade4 from XaiMarsh.fp_world_state LEFT JOIN XaiMarsh.fp_stats ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_stats.IDNumber LEFT JOIN XaiMarsh.fp_grades ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_grades.IDNumber';
-        async.series([   
+	var sql = 'SELECT XaiMarsh.fp_world_state.Firstname,XaiMarsh.fp_world_state.Lastname,XaiMarsh.fp_world_state.Dotw,XaiMarsh.fp_stats.FunFact,XaiMarsh.fp_stats.Knowledge,XaiMarsh.fp_stats.CommitProficiency,XaiMarsh.fp_stats.CodeQuality,XaiMarsh.fp_stats.MaxEnergy,XaiMarsh.fp_stats.GoogleProficiency,XaiMarsh.fp_grades.grade1,XaiMarsh.fp_grades.grade2,XaiMarsh.fp_grades.grade3,XaiMarsh.fp_grades.grade4 from XaiMarsh.fp_world_state LEFT JOIN XaiMarsh.fp_stats ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_stats.IDNumber LEFT JOIN XaiMarsh.fp_grades ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_grades.IDNumber';
+
+	async.series([   
                 function(callback){ 
                         connection.query(sql, (function(res){return function(err,rows,fields){ 
-                                        if(err){console.log("We have an error:");
-                                                console.log(err);}
-                                    	res.send(rows);
-                                        callback();
-                                }})(res));
-                       }
-                ]);
+                                if(err){console.log("We have an error:");
+                                        console.log(err);}
+                           	res.send(rows);
+                        	callback();
+                        }})(res));
+                }
+       ]);
 });
 app.get("/getCharInventory",function(req,res){
         var IDNumber = req.param('userID');
@@ -210,6 +211,23 @@ app.get("/freeEvents",function(req,res){
   }})(res));
 });
 
+app.get("/chanceClassEvents",function(req,res){
+  var sql = 'SELECT eventID,classID FROM XaiMarsh.fp_chance_class_events';
+     connection.query(sql,(function(res){return function(err,rows,fields){
+     if(err){console.log("We have an error:");
+             console.log(err);}
+     res.send(rows);
+  }})(res));
+});
+
+app.get("/chanceFreeEvents",function(req,res){
+  var sql = 'SELECT eventID FROM XaiMarsh.fp_chance_free_events';
+     connection.query(sql,(function(res){return function(err,rows,fields){
+     if(err){console.log("We have an error:");
+             console.log(err);}
+     res.send(rows);
+  }})(res));
+});
 
 
 app.get("/login", function(req, res) {
@@ -269,6 +287,45 @@ app.get("/addNewUser", function(req, res) {
         ]);
 });
 
+app.get("/getCurrentFreeEvent",function(req,res){
+	var eventID = req.param('eventID');
+	var sql = 'SELECT * FROM XaiMarsh.fp_free_events where eventID='+eventID;
+     	connection.query(sql,(function(res){return function(err,rows,fields){
+     	if(err){console.log("We have an error:");
+        	console.log(err);}
+     	res.send(rows);
+	}})(res));
+});
+
+app.get("/getCurrentClassEvent",function(req,res){
+        var eventID = req.param('eventID');
+        var sql = 'SELECT * FROM XaiMarsh.fp_class_events where eventID='+eventID;
+        connection.query(sql,(function(res){return function(err,rows,fields){
+        if(err){console.log("We have an error:");
+                console.log(err);}
+        res.send(rows);
+        }})(res));
+});
+
+app.get("/getCurrentChanceFreeEvent",function(req,res){
+        var eventID = req.param('eventID');
+        var sql = 'SELECT * FROM XaiMarsh.fp_chance_free_events where eventID='+eventID;
+        connection.query(sql,(function(res){return function(err,rows,fields){
+        if(err){console.log("We have an error:");
+                console.log(err);}
+        res.send(rows);
+        }})(res));
+});
+
+app.get("/getCurrentChanceClassEvent",function(req,res){
+        var eventID = req.param('eventID');
+        var sql = 'SELECT * FROM XaiMarsh.fp_chance_class_events where eventID='+eventID;
+        connection.query(sql,(function(res){return function(err,rows,fields){
+        if(err){console.log("We have an error:");
+                console.log(err);}
+        res.send(rows);
+        }})(res));
+});
 
 
 
