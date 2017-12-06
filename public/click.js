@@ -7,9 +7,11 @@ function GameStateCtrl($scope,registerApi){
 
    $scope.classEvents=[]; //Stores eventID for the corresponding
    $scope.freeEvents=[];  //Event in the database
-   $scope.chanceClassEvents=[];
-   $scope.chanceFreeEvents=[];
+//   $scope.chanceClassEvents=[];
+//   $scope.chanceFreeEvents=[];
+   $scope.currentClassEvent=0;
    $scope.numberOfEvents=0;
+   $scope.currentWeek=0;
    $scope.username="No one";
    $scope.password="N/A"
    //$scope.newCharacter=-1; //0 means they choose to login, 1 means they choose to make a new character
@@ -39,20 +41,6 @@ function GameStateCtrl($scope,registerApi){
 	   });
    }
 
-   function getChanceClassEvents() {
-        loading=true;
-        $scope.errorMessage='';
-        GameStateApi.getChanceClassEvents()
-           .success(function(data) {
-                   scope.chanceClassEvents=data;
-                   loading=false;
-           })
-           .error(function() {
-                   $scope.errorMessage="Unable to get chanceClassEvents: Database request failed";
-                   loading=false;
-           });
-   }
-
    function getCurrentClassEvent(){
         loading=true;
         $scope.errorMessage='';
@@ -68,22 +56,6 @@ function GameStateCtrl($scope,registerApi){
            });
    }
 
-   function getCurrentChanceFreeEvent(){
-        loading=true;
-        $scope.errorMessage='';
-        var eventID = getRandomInt(0, chanceClassEvents.length);
-        GameStateApi.getCurrentChanceClassEvent(eventID)
-           .success(function(data) {
-                   scope.currentEvent=data;
-                   loading=false;
-           })
-           .error(function(){
-                   $scope.errorMessage="Unable to get currentChanceClassEvent: Database request failed";
-                   loading=false;
-           });
-   }
-
-
    function getFreeEvents() {
         loading=true;
         $scope.errorMessage='';
@@ -94,20 +66,6 @@ function GameStateCtrl($scope,registerApi){
            })
            .error(function() {
                    $scope.errorMessage="Unable to get events: Database request failed";
-                   loading=false;
-           });
-   }
-
-   function getChanceFreeEvents() {
-        loading=true;
-        $scope.errorMessage='';
-        GameStateApi.getChanceFreeEvents()
-           .success(function(data) {
-                   scope.chanceFreeEvents=data;
-                   loading=false;
-           })
-           .error(function() {
-                   $scope.errorMessage="Unable to get chanceFreeEvents: Database request failed";
                    loading=false;
            });
    }
@@ -125,21 +83,6 @@ function GameStateCtrl($scope,registerApi){
 		   $scope.errorMessage="Unable to get currentFreeEvent: Database request failed";
 		   loading=false;
 	   });
-   }
-
-   function getCurrentChanceFreeEvent(){
-        loading=true;
-        $scope.errorMessage='';
-        var eventID = getRandomInt(0, chanceFreeEvents.length);
-        GameStateApi.getCurrentChanceFreeEvent(eventID)
-           .success(function(data) {
-                   scope.currentEvent=data;
-                   loading=false;
-           })
-           .error(function(){
-                   $scope.errorMessage="Unable to get currentChanceFreeEvent: Database request failed";
-                   loading=false;
-           });
    }
 
    //Thanks internet
@@ -161,20 +104,6 @@ function GameStateCtrl($scope,registerApi){
 		   $scope.errorMessage="Unable to get character information: Database request failed";
 		   loading=false;
 	   });
-   }
-
-   function getCharacterInventory(userID) {
-        loading=true;
-        $scope.errorMessage='';
-        GameStateApi.getCharacterInventory(userID)
-           .success(function(data) {
-                   scope.characterInventory=data;
-                   loading=false;
-           })
-           .error(function() {
-                   $scope.errorMessage="Unable to get character inventory: Database request failed";
-                   loading=false;
-           });
    }
 
    function login() {
@@ -212,7 +141,8 @@ function GameStateCtrl($scope,registerApi){
 			if(data.result1 == -1)
 			{
 				$scope.numberOfEvents++;
-				getNewEvent($scope.numberOfEvents);
+				alert(data.choice1);
+				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
 				loading = false;
 			}
 		}
@@ -230,7 +160,8 @@ function GameStateCtrl($scope,registerApi){
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
-                                getNewEvent($scope.numberOfEvents);
+				alert(data.choice1); //Is the new event goign to have the text in choice?
+				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
                 }
@@ -248,7 +179,8 @@ function GameStateCtrl($scope,registerApi){
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
-                                getNewEvent($scope.numberOfEvents);
+				alert(data.choice1);
+ 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
                 }
@@ -266,7 +198,8 @@ function GameStateCtrl($scope,registerApi){
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
-                                getNewEvent($scope.numberOfEvents);
+				alert(data.choice1);
+                                getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
                 }
@@ -282,29 +215,35 @@ function GameStateCtrl($scope,registerApi){
 
    }
 
-   function getNewEvents(eventCount) {
+   function getNewEvents(weeksCount, eventCount) {
 	   if(eventCount == 5) {
-		//UpdateDatabase -> got into new day
+		   gameStateApi.updateDatabase() //Insert alot of stuff
+		   .success(function(data){
+			   $scope.currentWeek++;
+			   $scope.numberOfEvents=0;
+			   loading=false;
+		   }
+		   .error(function(){
+			$scope.errorMessage="unable to updateDatabase: Database request failed";
+		   }
 	   }
-	   if(eventCount == 2) {
-		getCurrentChanceClassEvent();
-	   }
-	   else if (eventCount == 3) {
-		getCurrentChanceFreeEvent();
-	   }
-	   else if(eventCount%2 == 0) {
+	   else if(eventCount%2 == 0 && weeksCount%2 == 1) {
 		getCurrentClassEvent();
 	   }
-	   else if (eventCount%2 == 1) {
+	   else if(eventCount%2 == 0 && weeksCount%2 == 0) {
+                getCurrentFreeEvent();
+           }
+	   else if (eventCount%2 == 1 && weeksCount%2 == 1) {
 		getCurrentFreeEvent();
 	   }
+	   else if (eventCount%2 == 1 && weeksCount%2 == 0) {
+                getCurrentClassEvent();
+           }
    }
 
    getClassEvents();
-   getFreeEvents();
-   getChanceClassEvents();
-   getChanceFreeEvents();
-   getNewEvent($scope.numberOfEvents);
+   getFreeEvents(); 
+   getNewEvent($scope.currentWeek, $scope.numberOfEvents);
 }
 function gameStateApi($http,apiUrl){
   	return{
@@ -312,40 +251,20 @@ function gameStateApi($http,apiUrl){
       			var url = apiUrl + '/classEvents';
       			return $http.get(url);
     		},
-		getChanceClassEvents: function(){
-			var url = apiUrl + '/chanceClassEvents';
-			return $http.get(url);
-		},
 		getCurrentClassEvent: function(eventID){
                         var url = apiUrl + '/getCurrentClassEvent?eventID='+eventID;
 			return $http.get(url);
                 },
-		getCurrentChanceClassEvent: function(eventID){
-			var url = apiUrl + '/getCurrentChanceClassEvent?eventID='+eventID;
-			return $http.get(url);
-		},
 		getFreeEvents: function(){
         		var url = apiUrl + '/freeEvents';
         		return $http.get(url);
     		},
-		getChanceFreeEvents: function(){
-                        var url = apiUrl + '/chanceFreeEvents';
-                        return $http.get(url);
-                },
 		getCurrentFreeEvent: function(eventID){
 			var url = apiUrl + '/getCurrentFreeEvent?eventID='+eventID;
 			return $http.get(url);
 		},
-		getCurrentChanceFreeEvent: function(eventID){
-                        var url = apiUrl + '/getCurrentChanceFreeEvent?eventID='+eventID;
-			return $http.get(url);
-                },
 		getCharacterInformation: function(userID){
 			var url = apiUrl + '/getCharInfo?userID='+userID;
-			return $http.get(url);
-		},
-		getCharacterInventory: function(userID){
-			var url = apiUrl + '/getCharInventory?userID='+userID;
 			return $http.get(url);
 		},
 		login: function(username, password) {
