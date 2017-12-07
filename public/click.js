@@ -3,7 +3,7 @@ angular.module('gameState',[])
   .factory('gameStateApi',gameStateApi)
   .constant('apiUrl','http://localhost:1337'); 
 
-function GameStateCtrl($scope,registerApi){
+function GameStateCtrl($scope,gameStateApi){
 
    $scope.classEvents=[]; //Stores eventID for the corresponding
    $scope.freeEvents=[];  //Event in the database
@@ -15,21 +15,27 @@ function GameStateCtrl($scope,registerApi){
    $scope.username="No one";
    $scope.password="N/A"
    //$scope.newCharacter=-1; //0 means they choose to login, 1 means they choose to make a new character
-   $scope.characterInformation=characterInformation;
+   $scope.characterInformation;
    //$scope.characterInventory=characterInventory;
-   $scope.currentEvent=currentEvent;
+   $scope.currentEvent;
    $scope.userID=-1;
    $scope.isLoggedIn=false;
-   $scope.funFact=funFact;
-   $scope.knowledge=knowledge;
-   $scope.commitProficiency=commitProficiency;
-   $scope.codeQuality=codeQuality;
-   $scope.maxEnergy=maxEnergy;
-   $scope.googleProficiency=googleProficiency;
-   $scope.grade1=grade1;
-   $scope.grade2=grade2;
-   $scope.grade3=grade3;
-   $scope.grade4=grade4;
+   $scope.funFact=hbfu;
+   $scope.knowledge=0;
+   $scope.commitProficiency=0;
+   $scope.codeQuality=0;
+   $scope.maxEnergy=0;
+   $scope.googleProficiency=0;
+   $scope.stress=0;
+   $scope.grade1=0;
+   $scope.grade2=0;
+   $scope.grade3=0;
+   $scope.grade4=0;
+   $scope.eventText="";
+   $scope.choice1="";
+   $scope.choice2="";
+   $scope.choice3="";
+   $scope.choice4="";
    $scope.allStats = [["funfact"], ["knowledge"], ["commitproficiency"], ["codequality"], ["maxenergy"], ["googleproficiency"], ["stress"]];
 
    var loading = false;
@@ -41,9 +47,9 @@ function GameStateCtrl($scope,registerApi){
    function getClassEvents() {
 	loading=true;
 	$scope.errorMessage='';
-	GameStateApi.getClassEvents()
+	gameStateApi.getClassEvents()
 	   .success(function(data) {
-		   scope.classEvents=data;
+		   $scope.classEvents=data;
 		   loading=false;
 	   })
 	   .error(function() {
@@ -55,10 +61,10 @@ function GameStateCtrl($scope,registerApi){
    function getCurrentClassEvent(){
         loading=true;
         $scope.errorMessage='';
-        var eventID = getRandomInt(0, ClassEvents.length);
-        GameStateApi.getCurrentClassEvent(eventID)
+        var eventID = getRandomInt(0, classEvents.length);
+        gameStateApi.getCurrentClassEvent(eventID)
            .success(function(data) {
-                   scope.currentEvent=data;
+                   $scope.currentEvent=data;
                    loading=false;
            })
            .error(function(){
@@ -70,9 +76,9 @@ function GameStateCtrl($scope,registerApi){
    function getFreeEvents() {
         loading=true;
         $scope.errorMessage='';
-        GameStateApi.getFreeEvents()
+        gameStateApi.getFreeEvents()
            .success(function(data) {
-                   scope.freeEvents=data;
+		   $scope.freeEvents=data;
                    loading=false;
            })
            .error(function() {
@@ -84,16 +90,24 @@ function GameStateCtrl($scope,registerApi){
    function getCurrentFreeEvent(){
 	loading=true;
 	$scope.errorMessage='';
-	var eventID = getRandomInt(0, chanceFreeEvents.length);
-	GameStateApi.getCurrentChanceFreeEvent(eventID)
+	var eventID = getRandomInt(0, $scope.freeEvents.length);
+	gameStateApi.getCurrentFreeEvent(eventID)
 	   .success(function(data) {
-		   scope.currentEvent=data;
+		   $scope.currentEvent=data;
 		   loading=false;
 	   })
 	   .error(function(){
 		   $scope.errorMessage="Unable to get currentFreeEvent: Database request failed";
 		   loading=false;
 	   });
+   }
+
+   function getPrintVariables(data) {
+	$scope.eventText = data.eventText;
+	$scope.choice1 = data.button1;
+	$scope.choice2 = data.button2;
+	$scope.choice3 = data.button3;
+        $scope.choice4 = data.button4;   
    }
 
    //Thanks internet
@@ -106,7 +120,7 @@ function GameStateCtrl($scope,registerApi){
    function getCharacterInformation(userID) {
 	loading=true;
 	$scope.errorMessage='';
-	GameStateApi.getCharacterInformation(userID)
+	gameStateApi.getCharacterInformation(userID)
 	   .success(function(data) {
 		   saveStats(data);
 		   loading=false;
@@ -119,14 +133,14 @@ function GameStateCtrl($scope,registerApi){
 
    function login() {
 	$scope.errorMessage='';
-	loading = true;
-	var loggedIn = false; 
+	loading = true; 
 
 	gameStateApi.login($scope.username, $scope.password)
 	  .success(function(data){
 		if(data.length == 1){
 			$scope.userID=data.IDNumber;
-			loggedIn = true;
+			$scope.isLoggedIn = true;
+			getCharacterInformation($scope.userID);
 			loading = false;
 		}
 	  })
@@ -140,6 +154,36 @@ function GameStateCtrl($scope,registerApi){
 	  }
    }
 
+   function addNewUser(){
+	  $scope.errorMessage='';
+	  loading = true;
+
+	gameStateApi.checkName($scope.username)
+          .success(function(data){
+                if(data.length == 0){
+			gameStateApi.addNewUser($scope.username, $scope.password)
+				.success(function(data){
+					$scope.userID = data.IDNumber;
+					gameStateApi.newCharacter($scope.userID, $scope.firstname, $scope.lastname, 0)
+					.success(function() {
+						gameStateApi.getCharacterInformation($scope.userID)
+						$scope.isLoggedIn = true;
+					}
+					loading = false;
+				})
+				.error(function(){
+					$scope.errorMessage="error loading users: Database request failed - couldn't add user";
+					loading=false;
+				});
+                }
+          })
+          .error(function(){
+
+                $scope.errorMessage="error loading users: Database request failed - couldn't check username";
+                  loading = false;
+          });
+  }
+
 	//Write helper function that does the scanning (pass in button1, button2 etc depending on $event)
    function selectEventChoice($event) {
 	$scope.errorMessage='';
@@ -149,8 +193,13 @@ function GameStateCtrl($scope,registerApi){
 		gameStateApi.getResultEvent($scope.choice1)
 		.success(function(data){
 			$scope.currentEvent=data;
+			getPrintVariables(data);
 			if(data.result1 == -1)
 			{
+				//This where i do the stat thing?
+				if(relaventStat > 0) {
+					chanceRandomizer(relaventStat);
+				}
 				$scope.numberOfEvents++;
 				alert(data.choice1);
 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
@@ -168,6 +217,7 @@ function GameStateCtrl($scope,registerApi){
                 gameStateApi.getResultEvent($scope.choice2)
                 .success(function(data){
                         $scope.currentEvent=data;
+			getPrintVariables(data);
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
@@ -187,6 +237,7 @@ function GameStateCtrl($scope,registerApi){
                 gameStateApi.getResultEvent($scope.choice3)
                 .success(function(data){
                         $scope.currentEvent=data;
+			getPrintVariables(data);
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
@@ -206,6 +257,7 @@ function GameStateCtrl($scope,registerApi){
                 gameStateApi.getResultEvent($scope.choice4)
                 .success(function(data){
                         $scope.currentEvent=data;
+			getPrintVariables(data);
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
@@ -222,9 +274,9 @@ function GameStateCtrl($scope,registerApi){
    }
    
    //Checks the result string to see if it contains the name of one of the stats so it can increment it
-   function resultContainsStat(string) {
-
-   }
+   //function resultContainsStat(string) {
+//
+   //}
 
    function saveStats(datapacket) {
 	$scope.userID=datapacket.IDNumber;
@@ -241,12 +293,16 @@ function GameStateCtrl($scope,registerApi){
 	$scope.stress=datapacket.Stress;
    }
 
-   function getNewEvents(weeksCount, eventCount) {
+   function getNewEvent(weeksCount, eventCount) {
 	   if(eventCount == 5) {
 		   gameStateApi.updateDatabase($scope.userID, $scope.funFact, $scope.knowledge, $scope.commitProficiency, $scope.codeQuality,
 		   $scope.maxEnergy, $scope.googleProficiency, $scope.grade1, $scope.grade2, $scope.grade3, $scope.grade4, $scope.stress) //Insert alot of stuff
 		   .success(function(data){
-			   $scope.currentWeek++;
+			   if(currentWeek == 5) {
+				getGrades();
+			   } else {
+				$scope.currentWeek++;
+			   }
 			   $scope.numberOfEvents=0;
 			   loading=false;
 		   })
@@ -269,15 +325,15 @@ function GameStateCtrl($scope,registerApi){
    }
 
    function searchStringForKeyword(keyword, bigstringSmallfont) {
-	var toReturn bigstringSmallfont.includes(keyword);
+	   var toReturn = bigstringSmallfont.includes(keyword);
 	   return toReturn;
    }
 
    function checkForIncreaseStat(toCheck) {
 	var smallString = toCheck.lowerCase();
-	for (int i = 0; i < $scope.allStats.length; i++) {
-		for (int j = 0; j < $scope.allStats[i].length; j++) {
-			if (searchStringForKeyword($scope.allStats[i][j], smallString) {
+	for (i = 0; i < $scope.allStats.length; i++) {
+		for (j = 0; j < $scope.allStats[i].length; j++) {
+			if (searchStringForKeyword($scope.allStats[i][j], smallString)) {
 				$scope.allStats[i][0]++;
 				break;
 			}
@@ -285,10 +341,76 @@ function GameStateCtrl($scope,registerApi){
 	}
    }
 
+   function chanceRandomizer(relevantStat) {
+	if(relevantStat == 1) {
+		if((Math.random()*100 > (50+($scope.funFact*3)))) {
+			//Choose first event - Xai has it set up as successString@failString
+			//Query database for event with some symbol meaning take success or fail?
+
+		} else {
+			
+		}
+	}
+	else if(relevantStat == 2) {
+                if((Math.random()*100 > (50+($scope.knowledge*3)))) {
+
+                } else {
+                
+                }
+        }
+	else if(relevantStat == 3) {
+                if((Math.random()*100 > (50+($scope.commitProficiency*3)))) {
+
+                } else {
+                
+                }
+        }
+	else if(relevantStat == 4) {
+                if((Math.random()*100 > (50+($scope.codeQuality*3)))) {
+
+                } else {
+                
+                }
+        }
+	else if(relevantStat == 5) {
+                if((Math.random()*100 > (50+($scope.maxEnergy*3)))) {
+
+                } else {
+                
+                }
+        }
+	else if(relevantStat == 6) {
+                if((Math.random()*100 > (50+($scope.googleProficiency*3)))) {
+
+                } else {
+                
+                }
+        }
+	else if(relevantStat == 7) {
+                if((Math.random()*100 > (100-($scope.stress*8)))) {
+
+                } else {
+                
+                }
+        }
+   }
+
+   function getEndGrades() {
+	$scope.grade1 = ($scope.grade1 - (sress * 3)); //Algorithms
+	$scope.grade2 = ($scope.grade2 - (sress * 3)); //Databases
+	$scope.grade3 = ($scope.grade3 - (sress * 3)); //Practicum
+	$scope.grade4 = ($scope.grade4 - (sress * 3)); //Software Design
+	alert("Your grade for Algorithms: " + grade1.toPrecision(3) +
+		"\nYour grade for Databases: " + grade2.toPrecision(3) +
+		"\nYour grade for Practicum: " + grade3.toPrecision(3) +
+		"\nYour grade for Software Design: " + grade4.toPrecision(3));
+   }
+
    getClassEvents();
    getFreeEvents(); 
    getNewEvent($scope.currentWeek, $scope.numberOfEvents);
-   getStatsPacket();
+   //getStatsPacket();
+   hbfu();
 }
 function gameStateApi($http,apiUrl){
   	return{
