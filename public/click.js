@@ -20,6 +20,17 @@ function GameStateCtrl($scope,registerApi){
    $scope.currentEvent=currentEvent;
    $scope.userID=-1;
    $scope.isLoggedIn=false;
+   $scope.funFact=funFact;
+   $scope.knowledge=knowledge;
+   $scope.commitProficiency=commitProficiency;
+   $scope.codeQuality=codeQuality;
+   $scope.maxEnergy=maxEnergy;
+   $scope.googleProficiency=googleProficiency;
+   $scope.grade1=grade1;
+   $scope.grade2=grade2;
+   $scope.grade3=grade3;
+   $scope.grade4=grade4;
+   $scope.allStats = [["funfact"], ["knowledge"], ["commitproficiency"], ["codequality"], ["maxenergy"], ["googleproficiency"], ["stress"]];
 
    var loading = false;
 
@@ -97,7 +108,7 @@ function GameStateCtrl($scope,registerApi){
 	$scope.errorMessage='';
 	GameStateApi.getCharacterInformation(userID)
 	   .success(function(data) {
-		   scope.characterInformation=data;
+		   saveStats(data);
 		   loading=false;
 	   })
 	   .error(function() {
@@ -145,11 +156,11 @@ function GameStateCtrl($scope,registerApi){
 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
 				loading = false;
 			}
-		}
+		})
 		.error(function(){
 			$scope.errorMessage="unable to get result event: Database request failed";
 			loading = false;
-		}
+		});
 	}
 	
 	if ($event == 2) {
@@ -164,11 +175,11 @@ function GameStateCtrl($scope,registerApi){
 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
-                }
+                })
                 .error(function(){
                         $scope.errorMessage="unable to get result event: Database request failed";
                         loading = false;
-                }
+                });
         }
 
 	if ($event == 3) {
@@ -183,11 +194,11 @@ function GameStateCtrl($scope,registerApi){
  				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
-                }
+                })
                 .error(function(){
                         $scope.errorMessage="unable to get result event: Database request failed";
                         loading = false;
-                }
+                });
         }
 
 	if ($event == 4) {
@@ -202,11 +213,11 @@ function GameStateCtrl($scope,registerApi){
                                 getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
-                }
+                })
                 .error(function(){
                         $scope.errorMessage="unable to get result event: Database request failed";
                         loading = false;
-                }
+                });
         }	
    }
    
@@ -215,17 +226,33 @@ function GameStateCtrl($scope,registerApi){
 
    }
 
+   function saveStats(datapacket) {
+	$scope.userID=datapacket.IDNumber;
+	$scope.funFact=datapacket.FunFact;
+	$scope.knowledge=datapacket.Knowledge;
+	$scope.commitProficiency=datapacket.CommitProficiency;
+	$scope.codeQuality=datapacket.CodeQuality;
+	$scope.maxEnergy=datapacket.MaxEnergy;
+	$scope.googleProficiency=datapacket.GoogleProficiency;
+	$scope.grade1=datapacket.grade1;
+	$scope.grade2=datapacket.grade2;
+	$scope.grade3=datapacket.grade3;
+	$scope.grade4=datapacket.grade4;
+	$scope.stress=datapacket.Stress;
+   }
+
    function getNewEvents(weeksCount, eventCount) {
 	   if(eventCount == 5) {
-		   gameStateApi.updateDatabase() //Insert alot of stuff
+		   gameStateApi.updateDatabase($scope.userID, $scope.funFact, $scope.knowledge, $scope.commitProficiency, $scope.codeQuality,
+		   $scope.maxEnergy, $scope.googleProficiency, $scope.grade1, $scope.grade2, $scope.grade3, $scope.grade4, $scope.stress) //Insert alot of stuff
 		   .success(function(data){
 			   $scope.currentWeek++;
 			   $scope.numberOfEvents=0;
 			   loading=false;
-		   }
+		   })
 		   .error(function(){
 			$scope.errorMessage="unable to updateDatabase: Database request failed";
-		   }
+		   });
 	   }
 	   else if(eventCount%2 == 0 && weeksCount%2 == 1) {
 		getCurrentClassEvent();
@@ -241,9 +268,27 @@ function GameStateCtrl($scope,registerApi){
            }
    }
 
+   function searchStringForKeyword(keyword, bigstringSmallfont) {
+	var toReturn bigstringSmallfont.includes(keyword);
+	   return toReturn;
+   }
+
+   function checkForIncreaseStat(toCheck) {
+	var smallString = toCheck.lowerCase();
+	for (int i = 0; i < $scope.allStats.length; i++) {
+		for (int j = 0; j < $scope.allStats[i].length; j++) {
+			if (searchStringForKeyword($scope.allStats[i][j], smallString) {
+				$scope.allStats[i][0]++;
+				break;
+			}
+		}
+	}
+   }
+
    getClassEvents();
    getFreeEvents(); 
    getNewEvent($scope.currentWeek, $scope.numberOfEvents);
+   getStatsPacket();
 }
 function gameStateApi($http,apiUrl){
   	return{
@@ -272,12 +317,10 @@ function gameStateApi($http,apiUrl){
 			return $http.get(url);
 		},
 		updateDatabase: function(userID, dayOfTheWeek, funFact, knowledge, commitProficiency, codeQuality, maxEnergy, googleProficiency,
-		grade1, grade2, grade3, grade4) {
+		grade1, grade2, grade3, grade4, stress) {
 			var url = apiUrl + '/updateDatabase?userID='+userID+'&dayOfTheWeek='+dayOfTheWeek+'&funFact='+funFact+'&knowledge='+knowledge+
 				'&commitProficiency='+commitProficiency+'&codeQuality='+codeQuality+'&maxEnergy='+maxEnergy+'&googleProficiency='+googleProficiency+
-				'&grade1='+grade1+'&grade2='+grade2+'&grade3='+grade3+'&grade4='+grade4;
+				'&grade1='+grade1+'&grade2='+grade2+'&grade3='+grade3+'&grade4='+grade4+'&stress='+stress;
 		}
-
-
  };
 }
