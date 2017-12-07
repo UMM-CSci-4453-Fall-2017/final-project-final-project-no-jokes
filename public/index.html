@@ -1,14 +1,31 @@
+<!doctype html>
 <html>
-	<div class="container">
-          
-            <div class="leftpane"><h1>Left</h1></div>
-	    <div>
-           	 <div class="middlepane-image">Images</div>
-	   	 <div class="middlepane-text">Text</div>
-	   	 <div class="middlepane-options">Options</div>
-	    </div>
-            <div class="rightpane"><h1>Right</h1></div>
-	</div>
+<head lang="en">
+    <meta charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
+    <script src="click.js"></script>
+</head>
+	<body ng-app="gameState" ng-controller="gameStateCtrl">	
+		<div class="container" ng-if="isLoggedIn">
+	    		<div class="toppane">
+				<div class="toppane-name"> My name jeff </div>
+				<div class="toppane-one">Fun Fact: <b>{{funFact}}</b></div>
+				<div class="toppane-two">Knowledge: <b>{{knowledge}}</b></div>
+				<div class="toppane-three">Commit Proficiency: <b>{{commitProficiency}}</b></div>
+				<div class="toppane-four">Code Quality: <b>{{codeQuality}}</b></div>
+				<div class="toppane-five">Max Energy: <b>{{maxEnergy}}</b></div>
+				<div class="toppane-six">Google Proficiency: <b>{{googleProficiency}}</b></div>
+				<div class="toppane-seven">Stress: <b>{{stress}}</b></div>		
+	    		</div>
+           		<div class="middlepane-image">Images</div>
+	   	 	<div class="middlepane-text">Text</div>
+	   	 	<div class="middlepane-options">Options</div>
+		</div>
+
+		<div class="container" ng-if="!isLoggedIn">
+			
+		</div>
+	</body>
 
 <style>
 	body, html {
@@ -22,17 +39,9 @@
   height: 100%;
 }
 
-.leftpane {
-    width: 15%;
-    height: 100%;
-    float: left;
-    background-color: purple;
-    border-collapse: collapse;
-}
-
 .middlepane-image {
-    width: 70%;
-    height: 50%;
+    width: 100%;
+    height: 40%;
     float: left;
     background-color: royalblue;
     border-collapse: collapse;
@@ -40,7 +49,7 @@
 }
 
 .middlepane-text {
-    width: 70%;
+    width: 100%;
     height: 25%;
     float: left;
     background-color: red;
@@ -48,30 +57,67 @@
 }
 
 .middlepane-options {
-    width: 70%;
-    height: 25%;
+    width: 100%;
+    height: 30%;
     float: left;
     background-color: green;
     border-collapse: collapse;
 }
 
-
-.rightpane {
-  width: 15%;
-  right: 0%;
-  top: 00px;
-  height: 100%;
-  position: absolute;
-  float: right;
-  background-color: yellow;
-  border-collapse: collapse;
-}
-
 .toppane {
   width: 100%;
-  height: 100px;
+  height: 5%;
   border-collapse: collapse;
   background-color: #4da6ff;
 }
+
+.toppane-name {
+	width: 30%;
+	float: left;
+	height: 100%;
+}
+.toppane-one {
+	width: 10%;
+	right: 30%;
+	float: left;
+}
+.toppane-two {
+        width: 10%;
+        right: 40%;
+        float: left;
+}
+.toppane-three {
+        width: 10%;
+        right: 50%;
+        float: left;
+}
+.toppane-four {
+        width: 10%;
+        right: 60%;
+        float: left;
+}
+.toppane-five {
+        width: 10%;
+        right: 70%;
+        float: left;
+}
+.toppane-six {
+        width: 10%;
+        right: 80%;
+        float: left;
+}
+.toppane-seven {
+        width: 10%;
+        right: 90%;
+        float: left;
+}
+.toppane-border {
+	border-left: 1% black;
+	height: 100%;
+	right: 30%;
+}
+
 </style>
 </html>
+
+
