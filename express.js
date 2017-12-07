@@ -288,15 +288,13 @@ app.get("/addNewUser", function(req, res) {
         var sql = 'insert into XaiMarsh.fp_users values("'+username+'", "'+password+'",'+'0)';
 
         async.series([
-                function(callback){
-                        connection.query(sql, (function(res){return function(err,rows,fields){
-                                if(err){console.log("we have an error:");
-                                        console.log(err);
-                                        } else {
-                                                callback();
-                                        }
-                        }}));
-		},
+ 		function(callback){
+                                connection.query(sql, function(err,row,fields){
+                                        if(err){console.log("We have an error:");
+                                                console.log(err);}
+                                        callback();
+                                });
+                },
 		function(callback){
 			sql = 'select IDNumber from XaiMarsh.fp_users where username="'+username+'" and password="'+password+'"';
 			connection.query(sql,(function(res){return function(err, rows, fields) {
