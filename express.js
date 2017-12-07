@@ -103,9 +103,9 @@ app.get("/newCharacter",function(req,res){
                 },
 		function(callback){
 			if(Overwrite == 0){
-				sql = 'insert into XaiMarsh.fp_stats values ('+IDNumber+', 10, 10, 10, 10, 10, 10)';
+				sql = 'insert into XaiMarsh.fp_stats values ('+IDNumber+', 10, 10, 10, 10, 10, 10, 0)';
 			} else {
-				sql = 'update XaiMarsh.fp_stats set FunFact = 10, Knowledge = 10, CommitProficiency = 10, CodeQuality = 10, MaxEnergy = 10, GoogleProficiency = 10 where IDNumber = '+IDNumber;
+				sql = 'update XaiMarsh.fp_stats set FunFact = 10, Knowledge = 10, CommitProficiency = 10, CodeQuality = 10, MaxEnergy = 10, GoogleProficiency = 10, Stress=0 where IDNumber = '+IDNumber;
 			}
                         connection.query(sql, function(err,row,fields){
                                 if(err){console.log("We have an error:");
