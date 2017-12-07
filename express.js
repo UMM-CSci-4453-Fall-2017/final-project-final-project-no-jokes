@@ -292,9 +292,21 @@ app.get("/addNewUser", function(req, res) {
                         connection.query(sql, (function(res){return function(err,rows,fields){
                                 if(err){console.log("we have an error:");
                                         console.log(err);
-                                        res.send(err)} else {
+                                        } else {
                                                 callback();
                                         }
+                        }}));
+		},
+		function(callback){
+			sql = 'select IDNumber from XaiMarsh.fp_users where username="'+username+'" and password="'+password+'"';
+			connection.query(sql,(function(res){return function(err, rows, fields) {
+                                if(err){console.log("We have an error:");
+                                        console.log(err);
+                                       res.send(err)}
+                                else{
+                                res.send(rows);
+                                callback();
+                                }
                         }})(res));
                 }
         ]);
@@ -390,7 +402,7 @@ app.get("/updateDatabase",function(req,res){
                         });
                 },
                 function(callback){
-                        sql = 'update XaiMarsh.grades set grade1 = '+grade1', grade2 = '+grade2+', grade3 = '+grade3+', grade4 = '+grade4+' where IDNumber='IDNumber;
+                        sql = 'update XaiMarsh.grades set grade1 = '+grade1+', grade2 = '+grade2+', grade3 = '+grade3+', grade4 = '+grade4+' where IDNumber='+IDNumber;
                         connection.query(sql, (function(res){return function(err,rows,fields){
                                         if(err){console.log("We have an error:");
                                                 console.log(err);}
