@@ -107,11 +107,11 @@ function GameStateCtrl($scope,gameStateApi){
    }
 
    function getPrintVariables(data) {
-	$scope.eventText = data.eventText;
-	$scope.choice1 = data.button1;
-	$scope.choice2 = data.button2;
-	$scope.choice3 = data.button3;
-        $scope.choice4 = data.button4;   
+	$scope.eventText = data[0].eventText;
+	$scope.choice1 = data[0].button1;
+	$scope.choice2 = data[0].button2;
+	$scope.choice3 = data[0].button3;
+        $scope.choice4 = data[0].button4;   
    }
 
    //Thanks internet
@@ -126,7 +126,7 @@ function GameStateCtrl($scope,gameStateApi){
 	$scope.errorMessage='';
 	gameStateApi.getCharacterInformation(userID)
 	   .success(function(data) {
-		   saveStats(data);
+		   saveStats(data[0]);
 		   loading=false;
 	   })
 	   .error(function() {
@@ -221,7 +221,7 @@ function GameStateCtrl($scope,gameStateApi){
 		gameStateApi.getResultEvent($scope.choice1)
 		.success(function(data){
 			$scope.currentEvent=data;
-			getPrintVariables(data);
+			getPrintVariables(data[0]);
 			if(data.result1 == -1)
 			{
 				//This where i do the stat thing?
@@ -229,7 +229,7 @@ function GameStateCtrl($scope,gameStateApi){
 					chanceRandomizer(relaventStat);
 				}
 				$scope.numberOfEvents++;
-				alert(data.choice1);
+				alert(data[0].choice1);
 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
 				loading = false;
 			}
@@ -249,7 +249,7 @@ function GameStateCtrl($scope,gameStateApi){
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
-				alert(data.choice1); //Is the new event goign to have the text in choice?
+				alert(data[0].choice1); //Is the new event goign to have the text in choice?
 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
@@ -269,7 +269,7 @@ function GameStateCtrl($scope,gameStateApi){
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
-				alert(data.choice1);
+				alert(data[0].choice1);
  				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
@@ -289,7 +289,7 @@ function GameStateCtrl($scope,gameStateApi){
                         if(data.result1 == -1)
                         {
                                 $scope.numberOfEvents++;
-				alert(data.choice1);
+				alert(data[0].choice1);
                                 getNewEvent($scope.currentWeek, $scope.numberOfEvents);
                                 loading = false;
                         }
@@ -319,8 +319,6 @@ function GameStateCtrl($scope,gameStateApi){
 	$scope.grade3=datapacket.grade3;
 	$scope.grade4=datapacket.grade4;
 	$scope.stress=datapacket.Stress;
-	   console.log($scope.stress);
-	   console.log("hey: "+datapacket.Stress);
    }
 
    function getNewEvent(weeksCount, eventCount) {
@@ -342,15 +340,19 @@ function GameStateCtrl($scope,gameStateApi){
 	   }
 	   else if(eventCount%2 == 0 && weeksCount%2 == 1) {
 		getCurrentClassEvent();
+		eventCount++;
 	   }
 	   else if(eventCount%2 == 0 && weeksCount%2 == 0) {
                 getCurrentFreeEvent();
+		eventCount++;
            }
 	   else if (eventCount%2 == 1 && weeksCount%2 == 1) {
 		getCurrentFreeEvent();
+		eventCount++;
 	   }
 	   else if (eventCount%2 == 1 && weeksCount%2 == 0) {
                 getCurrentClassEvent();
+		eventCount++;
            }
    }
 
@@ -359,12 +361,30 @@ function GameStateCtrl($scope,gameStateApi){
 	   return toReturn;
    }
 
+   function increaseStat(toCompare) {
+	if(toCompare.equals($scope.funFact)) {
+		$scope.funFact++;
+	} else if (toCompare.equals($scope.knowledge)) {
+		$scope.knowledge++;
+	} else if (toCompare.equals($scope.commitProficiency)) {
+                $scope.commitProficiency++;
+        } else if (toCompare.equals($scope.codeQuality)) {
+                $scope.codeQuality++;
+        } else if (toCompare.equals($scope.maxEnergy)) {
+                $scope.maxEnergy++;
+        } else if (toCompare.equals($scope.googleProficiency)) {
+                $scope.googleProficiency++;
+        } else if (toCompare.equals($scope.stress)) {
+                $scope.stress++;
+        }
+   }
+
    function checkForIncreaseStat(toCheck) {
 	var smallString = toCheck.lowerCase();
 	for (i = 0; i < $scope.allStats.length; i++) {
 		for (j = 0; j < $scope.allStats[i].length; j++) {
 			if (searchStringForKeyword($scope.allStats[i][j], smallString)) {
-				$scope.allStats[i][0]++;
+				increaseStat($scope.allStats[i][0]);
 				break;
 			}
 		}
