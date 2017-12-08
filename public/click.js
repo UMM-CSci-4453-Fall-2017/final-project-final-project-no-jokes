@@ -9,9 +9,9 @@ function GameStateCtrl($scope,gameStateApi){
    $scope.freeEvents=[];  //Event in the database
 //   $scope.chanceClassEvents=[];
 //   $scope.chanceFreeEvents=[];
-   $scope.currentClassEvent=0;
+   $scope.currentClassEvent=1;
    $scope.numberOfEvents=0;
-   $scope.currentWeek=0;
+   $scope.currentDay=1;
    $scope.username;
    $scope.password;
    //$scope.newCharacter=-1; //0 means they choose to login, 1 means they choose to make a new character
@@ -36,11 +36,12 @@ function GameStateCtrl($scope,gameStateApi){
    $scope.choice2="";
    $scope.choice3="";
    $scope.choice4="";
-   $scope.allStats = [["funfact"], ["knowledge"], ["commitproficiency"], ["codequality"], ["maxenergy"], ["googleproficiency"], ["stress"]];
+   $scope.allStats = [["fun fact"], ["knowledge"], ["commit proficiency"], ["code quality"], ["max energy"], ["google proficiency"], ["stress"]];
    $scope.addNewUser = addNewUser;
    $scope.login=login;
    $scope.firstname="Xai";
    $scope.lastname="Yang";
+   $scope.selectEventChoice=selectEventChoice;
 
    var loading = false;
 
@@ -51,6 +52,11 @@ function GameStateCtrl($scope,gameStateApi){
    function getClassEvents() {
 	loading=true;
 	$scope.errorMessage='';
+	if ($scope.currentDay == 1) $scope.currentClassEvent = 1;
+        if ($scope.currentDay == 2) $scope.currentClassEvent = 4;
+        if ($scope.currentDay == 3) $scope.currentClassEvent = 6;
+        if ($scope.currentDay == 4) $scope.currentClassEvent = 9;
+        if ($scope.currentDay == 5) $scope.currentClassEvent = 11;
 	gameStateApi.getClassEvents()
 	   .success(function(data) {
 		   $scope.classEvents=data;
@@ -65,10 +71,20 @@ function GameStateCtrl($scope,gameStateApi){
    function getCurrentClassEvent(){
         loading=true;
         $scope.errorMessage='';
-        var eventID = getRandomInt(0, classEvents.length);
+
+//	if ($scope.currentDay == 1) $scope.currentClassEvent = 1;
+//	if ($scope.currentDay == 2) $scope.currentClassEvent = 4;
+//	if ($scope.currentDay == 3) $scope.currentClassEvent = 6;
+//	if ($scope.currentDay == 4) $scope.currentClassEvent = 9;
+//	if ($scope.currentDay == 5) $scope.currentClassEvent = 11;
+	eventID = $scope.currentClassEvent;
+	$scope.currentClassEvent++;
+
         gameStateApi.getCurrentClassEvent(eventID)
            .success(function(data) {
+		   console.log("success");
                    $scope.currentEvent=data;
+		   getPrintVariables(data);
                    loading=false;
            })
            .error(function(){
@@ -107,11 +123,16 @@ function GameStateCtrl($scope,gameStateApi){
    }
 
    function getPrintVariables(data) {
-	$scope.eventText = data[0].eventText;
+	console.log(data[0]);
+	   $scope.eventText = data[0].eventText;
 	$scope.choice1 = data[0].button1;
 	$scope.choice2 = data[0].button2;
 	$scope.choice3 = data[0].button3;
-        $scope.choice4 = data[0].button4;   
+        $scope.choice4 = data[0].button4;
+	$scope.result1 = data[0].result1;
+	$scope.result2 = data[0].result2;
+	$scope.result3 = data[0].result3;
+	$scope.result4 = data[0].result4;
    }
 
    //Thanks internet
@@ -144,7 +165,7 @@ function GameStateCtrl($scope,gameStateApi){
 	gameStateApi.login($scope.username, $scope.password)
 	  .success(function(data){
 		if(data.length == 1){
-			$scope.userID=data.IDNumber;
+			$scope.userID=data[0].IDNumber;
 			$scope.isLoggedIn = true;
 			getCharacterInformation($scope.userID);
 			loading = false;
@@ -155,7 +176,7 @@ function GameStateCtrl($scope,gameStateApi){
 		  loading = false;
 	  });
 
-	  if(!scope.isloggedIn){
+	  if(!$scope.isloggedIn){
 		$scope.personLoggedIn = "Please Log In";
 	  }
    }
@@ -214,23 +235,25 @@ function GameStateCtrl($scope,gameStateApi){
 
 	//Write helper function that does the scanning (pass in button1, button2 etc depending on $event)
    function selectEventChoice($event) {
+	console.log("it got in selectEChoice");
 	$scope.errorMessage='';
 	loading = true;
-	if ($event == 1) {
-		resultContainsStat(result1);
-		gameStateApi.getResultEvent($scope.choice1)
+	if ($event.target.id == 1) {
+		checkForIncreaseStat($scope.choice1);
+		console.log($scope.result1);
+		gameStateApi.getResultEvent($scope.result1)
 		.success(function(data){
 			$scope.currentEvent=data;
-			getPrintVariables(data[0]);
-			if(data.result1 == -1)
+			getPrintVariables(data);
+			if(data[0].result1 == -1)
 			{
 				//This where i do the stat thing?
-				if(relaventStat > 0) {
-					chanceRandomizer(relaventStat);
+				if(data[0].relevantStat > -1) {
+					chanceRandomizer(data[0].relevantStat);
 				}
 				$scope.numberOfEvents++;
 				alert(data[0].choice1);
-				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
+				getNewEvent($scope.currentDay, $scope.numberOfEvents);
 				loading = false;
 			}
 		})
@@ -240,17 +263,20 @@ function GameStateCtrl($scope,gameStateApi){
 		});
 	}
 	
-	if ($event == 2) {
-                resultContainsStat(result2);
-                gameStateApi.getResultEvent($scope.choice2)
+	if ($event.target.id == 2) {
+                checkForIncreaseStat($scope.choice2);
+                gameStateApi.getResultEvent($scope.result2)
                 .success(function(data){
                         $scope.currentEvent=data;
 			getPrintVariables(data);
-                        if(data.result1 == -1)
+                        if(data[0].result1 == -1)
                         {
+				if(data[0].relevantStat > -1) {
+                                        chanceRandomizer(data[0].relevantStat);
+                                }
                                 $scope.numberOfEvents++;
 				alert(data[0].choice1); //Is the new event goign to have the text in choice?
-				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
+				getNewEvent($scope.currentDay, $scope.numberOfEvents);
                                 loading = false;
                         }
                 })
@@ -260,17 +286,20 @@ function GameStateCtrl($scope,gameStateApi){
                 });
         }
 
-	if ($event == 3) {
-                resultContainsStat(result3);
-                gameStateApi.getResultEvent($scope.choice3)
+	if ($event.target.id == 3) {
+                checkForIncreaseStat($scope.choice3);
+                gameStateApi.getResultEvent($scope.result3)
                 .success(function(data){
                         $scope.currentEvent=data;
 			getPrintVariables(data);
-                        if(data.result1 == -1)
+                        if(data[0].result1 == -1)
                         {
+				if(data[0].relevantStat > -1) {
+                                        chanceRandomizer(data[0].relevantStat);
+                                }
                                 $scope.numberOfEvents++;
 				alert(data[0].choice1);
- 				getNewEvent($scope.currentWeek, $scope.numberOfEvents);
+ 				getNewEvent($scope.currentDay, $scope.numberOfEvents);
                                 loading = false;
                         }
                 })
@@ -280,17 +309,20 @@ function GameStateCtrl($scope,gameStateApi){
                 });
         }
 
-	if ($event == 4) {
-                resultContainsStat(result4);
-                gameStateApi.getResultEvent($scope.choice4)
+	if ($event.target.id == 4) {
+                checkForIncreaseStat($scope.choice4);
+                gameStateApi.getResultEvent($scope.result4)
                 .success(function(data){
                         $scope.currentEvent=data;
 			getPrintVariables(data);
-                        if(data.result1 == -1)
+                        if(data[0].result1 == -1)
                         {
+				if(data[0].relevantStat > -1) {
+                                        chanceRandomizer(data[0].relevantStat);
+                                }
                                 $scope.numberOfEvents++;
 				alert(data[0].choice1);
-                                getNewEvent($scope.currentWeek, $scope.numberOfEvents);
+                                getNewEvent($scope.currentDay, $scope.numberOfEvents);
                                 loading = false;
                         }
                 })
@@ -321,15 +353,16 @@ function GameStateCtrl($scope,gameStateApi){
 	$scope.stress=datapacket.Stress;
    }
 
-   function getNewEvent(weeksCount, eventCount) {
+   function getNewEvent(dayCount, eventCount) {
+	   console.log("it got into getNewEvent" + dayCount + "now eventCount:" + eventCount);
 	   if(eventCount == 5) {
 		   gameStateApi.updateDatabase($scope.userID, $scope.funFact, $scope.knowledge, $scope.commitProficiency, $scope.codeQuality,
 		   $scope.maxEnergy, $scope.googleProficiency, $scope.grade1, $scope.grade2, $scope.grade3, $scope.grade4, $scope.stress) //Insert alot of stuff
 		   .success(function(data){
-			   if(currentWeek == 5) {
+			   if(dayCount == 5) {
 				getGrades();
 			   } else {
-				$scope.currentWeek++;
+				$scope.currentDay++;
 			   }
 			   $scope.numberOfEvents=0;
 			   loading=false;
@@ -338,19 +371,20 @@ function GameStateCtrl($scope,gameStateApi){
 			$scope.errorMessage="unable to updateDatabase: Database request failed";
 		   });
 	   }
-	   else if(eventCount%2 == 0 && weeksCount%2 == 1) {
+	   else if(eventCount%2 == 0 && dayCount%2 == 1) {
+		console.log("it got into the right place");
 		getCurrentClassEvent();
 		eventCount++;
 	   }
-	   else if(eventCount%2 == 0 && weeksCount%2 == 0) {
+	   else if(eventCount%2 == 0 && dayCount%2 == 0) {
                 getCurrentFreeEvent();
 		eventCount++;
            }
-	   else if (eventCount%2 == 1 && weeksCount%2 == 1) {
+	   else if (eventCount%2 == 1 && dayCount%2 == 1) {
 		getCurrentFreeEvent();
 		eventCount++;
 	   }
-	   else if (eventCount%2 == 1 && weeksCount%2 == 0) {
+	   else if (eventCount%2 == 1 && dayCount%2 == 0) {
                 getCurrentClassEvent();
 		eventCount++;
            }
@@ -362,25 +396,25 @@ function GameStateCtrl($scope,gameStateApi){
    }
 
    function increaseStat(toCompare) {
-	if(toCompare.equals($scope.funFact)) {
+	if(toCompare.equals("fun fact")) {
 		$scope.funFact++;
-	} else if (toCompare.equals($scope.knowledge)) {
+	} else if (toCompare.equals("knowledge")) {
 		$scope.knowledge++;
-	} else if (toCompare.equals($scope.commitProficiency)) {
+	} else if (toCompare.equals("commit proficiency")) {
                 $scope.commitProficiency++;
-        } else if (toCompare.equals($scope.codeQuality)) {
+        } else if (toCompare.equals("code quality")) {
                 $scope.codeQuality++;
-        } else if (toCompare.equals($scope.maxEnergy)) {
+        } else if (toCompare.equals("max energy")) {
                 $scope.maxEnergy++;
-        } else if (toCompare.equals($scope.googleProficiency)) {
+        } else if (toCompare.equals("google proficiency")) {
                 $scope.googleProficiency++;
-        } else if (toCompare.equals($scope.stress)) {
+        } else if (toCompare.equals("stress")) {
                 $scope.stress++;
         }
    }
 
    function checkForIncreaseStat(toCheck) {
-	var smallString = toCheck.lowerCase();
+	var smallString = toCheck.toLowerCase();
 	for (i = 0; i < $scope.allStats.length; i++) {
 		for (j = 0; j < $scope.allStats[i].length; j++) {
 			if (searchStringForKeyword($scope.allStats[i][j], smallString)) {
@@ -458,8 +492,7 @@ function GameStateCtrl($scope,gameStateApi){
 
    getClassEvents();
    getFreeEvents(); 
-   getNewEvent($scope.currentWeek, $scope.numberOfEvents);
-   //getStatsPacket();
+   getNewEvent($scope.currentDay, $scope.numberOfEvents);
 }
 function gameStateApi($http,apiUrl){
   	return{
@@ -479,6 +512,10 @@ function gameStateApi($http,apiUrl){
 			var url = apiUrl + '/getCurrentFreeEvent?eventID='+eventID;
 			return $http.get(url);
 		},
+		getResultEvent: function(eventID){
+                        var url = apiUrl + '/getResultEvent?eventID='+eventID;
+                        return $http.get(url);
+                },
 		getCharacterInformation: function(userID){
 			var url = apiUrl + '/getCharInfo?userID='+userID;
 			return $http.get(url);
