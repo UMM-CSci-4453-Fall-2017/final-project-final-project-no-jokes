@@ -91,9 +91,9 @@ app.get("/newCharacter",function(req,res){
 	        function(callback){
 
 			if(Overwrite == 0){
-				sql = 'insert into XaiMarsh.fp_world_state values ('+IDNumber+', "'+Firstname+'", "'+Lastname+'", 0)';
+				sql = 'insert into XaiMarsh.fp_world_state values ('+IDNumber+', "'+Firstname+'", "'+Lastname+'", 1)';
 			} else {
-				sql = 'update XaiMarsh.fp_world_state set Firstname = "'+Firstname+'", Lastname = "'+Lastname+'", Dotw = 0 where IDNumber = '+IDNumber;
+				sql = 'update XaiMarsh.fp_world_state set Firstname = "'+Firstname+'", Lastname = "'+Lastname+'", Dotw = 1 where IDNumber = '+IDNumber;
 			}
         	        connection.query(sql, function(err,row,fields){
                 	        if(err){console.log("We have an error:");
@@ -131,7 +131,7 @@ app.get("/newCharacter",function(req,res){
 
 app.get("/getCharInfo",function(req,res){
 	var IDNumber = req.param('userID');
-	var sql = 'SELECT XaiMarsh.fp_world_state.Firstname,XaiMarsh.fp_world_state.Lastname,XaiMarsh.fp_world_state.Dotw,XaiMarsh.fp_stats.FunFact,XaiMarsh.fp_stats.Knowledge,XaiMarsh.fp_stats.CommitProficiency,XaiMarsh.fp_stats.CodeQuality,XaiMarsh.fp_stats.MaxEnergy,XaiMarsh.fp_stats.GoogleProficiency,fp_stats.Stress, XaiMarsh.fp_grades.grade1,XaiMarsh.fp_grades.grade2,XaiMarsh.fp_grades.grade3,XaiMarsh.fp_grades.grade4 from XaiMarsh.fp_world_state LEFT JOIN XaiMarsh.fp_stats ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_stats.IDNumber LEFT JOIN XaiMarsh.fp_grades ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_grades.IDNumber';
+	var sql = 'SELECT XaiMarsh.fp_world_state.Firstname,XaiMarsh.fp_world_state.Lastname,XaiMarsh.fp_world_state.Dotw,XaiMarsh.fp_stats.FunFact,XaiMarsh.fp_stats.Knowledge,XaiMarsh.fp_stats.CommitProficiency,XaiMarsh.fp_stats.CodeQuality,XaiMarsh.fp_stats.MaxEnergy,XaiMarsh.fp_stats.GoogleProficiency,fp_stats.Stress, XaiMarsh.fp_grades.grade1,XaiMarsh.fp_grades.grade2,XaiMarsh.fp_grades.grade3,XaiMarsh.fp_grades.grade4 from XaiMarsh.fp_world_state LEFT JOIN XaiMarsh.fp_stats ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_stats.IDNumber LEFT JOIN XaiMarsh.fp_grades ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_grades.IDNumber where XaiMarsh.fp_world_state.IDNumber = '+IDNumber;
 
 	async.series([   
                 function(callback){ 
@@ -158,53 +158,6 @@ app.get("/getCharInfo",function(req,res){
 //                       }
 //                ]);
 //});
-
-app.get("/world_state",function(req,res){
-        var user = req.param('user');
-        var sql = 'insert into XaiMarsh.till_sales values('+receiptNumber+', '+invID+', '+quantity+', '+firstTime+', '+lastTime+')';
-        var newQuantity = 0;
-        if(invID != -1){
-        	async.series([
-                	function(callback){
-                        	connection.query(sql, function(err,row,fields){
-                                	if(err){console.log("We have an error:");
-                                        	console.log(err);}
-                	                callback();
-                        	});
-                	},
-		
-			function(callback){
-        	                connection.query(sql, function(err,row,fields){
-                	                if(err){console.log("We have an error:");
-                        	                console.log(err);}
-                                	callback();
-	                        });
-        	        },
-                	function(callback){
-                        	sql = 'update XaiMarsh.till_inventory set amount='+newQuantity+' where id='+invID;
-                        	connection.query(sql, (function(res){return function(err,rows,fields){
-                                	if(err){console.log("We have an error:");
-                                        	console.log(err);}
-    	                            res.send(err);
-        	                        callback();
-                	        }})(res));
-         	       }
-        	]);
-        } else {
-                async.series([
-                	function(callback){
-                        	sql = 'insert into XaiMarsh.user_sales values('+receiptNumber+', "'+user+'",'+firstTime+', '+lastTime+', '+finalCost+')';
-                        	connection.query(sql, (function(res){return function(err,rows,fields){
-                                	if(err){console.log("We have an error:");
-                                        	console.log(err);}
-                                	res.send(err);
-                                	callback();
-                        	}})(res));
-                	}
-        	]);
-
-        }
-});
 
 app.get("/classEvents",function(req,res){
   var sql = 'SELECT eventID FROM XaiMarsh.fp_class_events';
@@ -373,6 +326,7 @@ app.get("/updateDatabase",function(req,res){
 	var CodeQuality = req.param('CodeQuality');
 	var MaxEnergy = req.param('MaxEnergy');
 	var GoogleProficiency = req.param('GoogleProficiency');
+	var Stress = req.param('Stress');
 
 	//grades
 	var grade1 = req.param('grade1');
@@ -382,7 +336,7 @@ app.get("/updateDatabase",function(req,res){
    
        // var sql = 'SELECT XaiMarsh.fp_world_state.Firstname,XaiMarsh.fp_world_state.Lastname,XaiMarsh.fp_world_state.Dotw,XaiMarsh.fp_stats.FunFact,XaiMarsh.fp_stats.Knowledge,XaiMarsh.fp_stats.CommitProficiency,XaiMarsh.fp_stats.CodeQuality,XaiMarsh.fp_stats.MaxEnergy,XaiMarsh.fp_stats.GoogleProficiency,XaiMarsh.fp_grades.grade1,XaiMarsh.fp_grades.grade2,XaiMarsh.fp_grades.grade3,XaiMarsh.fp_grades.grade4 from XaiMarsh.fp_world_state LEFT JOIN XaiMarsh.fp_stats ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_stats.IDNumber LEFT JOIN XaiMarsh.fp_grades ON XaiMarsh.fp_world_state.IDNumber=XaiMarsh.fp_grades.IDNumber';
 
-	var sql = 'update XaiMarsh.world_state set Dotw = '+Dotw+' where XaiMarsh.world_state.IDNumber = '+IDNumber;
+	var sql = 'update XaiMarsh.fp_world_state set Dotw = '+Dotw+' where XaiMarsh.fp_world_state.IDNumber = '+IDNumber;
 	async.series([
                 function(callback){
                         connection.query(sql, function(err,row,fields){
@@ -392,7 +346,7 @@ app.get("/updateDatabase",function(req,res){
                         });
                 },
 		function(callback){
-			sql = 'update XaiMarsh.stats set FunFact = '+FunFact+', Knowledge = '+Knowledge+', CommitProficiency = '+CommitProficiency+', CodeQuality = '+CodeQuality+', MaxEnergy = '+MaxEnergy+', GoogleProficiency = '+GoogleProficiency+' where IDNumber = '+IDNumber;
+			sql = 'update XaiMarsh.fp_stats set FunFact = '+FunFact+', Knowledge = '+Knowledge+', CommitProficiency = '+CommitProficiency+', CodeQuality = '+CodeQuality+', MaxEnergy = '+MaxEnergy+', GoogleProficiency = '+GoogleProficiency+', Stress = '+Stress+' where IDNumber = '+IDNumber;
                         connection.query(sql, function(err,row,fields){
                                 if(err){console.log("We have an error:");
                                         console.log(err);}
@@ -400,7 +354,7 @@ app.get("/updateDatabase",function(req,res){
                         });
                 },
                 function(callback){
-                        sql = 'update XaiMarsh.grades set grade1 = '+grade1+', grade2 = '+grade2+', grade3 = '+grade3+', grade4 = '+grade4+' where IDNumber='+IDNumber;
+                        sql = 'update XaiMarsh.fp_grades set grade1 = '+grade1+', grade2 = '+grade2+', grade3 = '+grade3+', grade4 = '+grade4+' where IDNumber='+IDNumber;
                         connection.query(sql, (function(res){return function(err,rows,fields){
                                         if(err){console.log("We have an error:");
                                                 console.log(err);}
