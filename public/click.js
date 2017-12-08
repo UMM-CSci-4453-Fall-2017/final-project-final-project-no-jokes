@@ -12,15 +12,15 @@ function GameStateCtrl($scope,gameStateApi){
    $scope.currentClassEvent=0;
    $scope.numberOfEvents=0;
    $scope.currentWeek=0;
-   $scope.username="No one";
-   $scope.password="N/A"
+   $scope.username;
+   $scope.password;
    //$scope.newCharacter=-1; //0 means they choose to login, 1 means they choose to make a new character
    $scope.characterInformation;
    //$scope.characterInventory=characterInventory;
    $scope.currentEvent;
    $scope.userID=-1;
    $scope.isLoggedIn=false;
-   $scope.funFact=hbfu;
+   $scope.funFact=0;
    $scope.knowledge=0;
    $scope.commitProficiency=0;
    $scope.codeQuality=0;
@@ -37,6 +37,10 @@ function GameStateCtrl($scope,gameStateApi){
    $scope.choice3="";
    $scope.choice4="";
    $scope.allStats = [["funfact"], ["knowledge"], ["commitproficiency"], ["codequality"], ["maxenergy"], ["googleproficiency"], ["stress"]];
+   $scope.addNewUser = addNewUser;
+   $scope.login=login;
+   $scope.firstname="Xai";
+   $scope.lastname="Yang";
 
    var loading = false;
 
@@ -131,9 +135,11 @@ function GameStateCtrl($scope,gameStateApi){
 	   });
    }
 
-   function login() {
+   function login(username, password) {
 	$scope.errorMessage='';
 	loading = true; 
+	$scope.username=username;
+	$scope.password=password;
 
 	gameStateApi.login($scope.username, $scope.password)
 	  .success(function(data){
@@ -149,30 +155,52 @@ function GameStateCtrl($scope,gameStateApi){
 		  loading = false;
 	  });
 
-	  if(!isloggedIn){
+	  if(!scope.isloggedIn){
 		$scope.personLoggedIn = "Please Log In";
 	  }
    }
 
-   function addNewUser(){
+
+   function addNewUser(username, password){
 	  $scope.errorMessage='';
 	  loading = true;
+	  $scope.username=username;
+	  $scope.password=password;
 
 	gameStateApi.checkName($scope.username)
           .success(function(data){
+		console.log("before if: "+ data.length);
                 if(data.length == 0){
+			console.log("got in if");
 			gameStateApi.addNewUser($scope.username, $scope.password)
 				.success(function(data){
-					$scope.userID = data.IDNumber;
+					console.log(data[0].IDNumber);
+					$scope.userID = data[0].IDNumber;
+					console.log($scope.userID);
 					gameStateApi.newCharacter($scope.userID, $scope.firstname, $scope.lastname, 0)
-					.success(function() {
+					.success(function(data) {
+						console.log("passed newCharacter");
 						gameStateApi.getCharacterInformation($scope.userID)
+						.success(function(data){
+							saveStats(data[0]);
+							loading=false;
+						})
+						.error(function(){
+							$scope.errorMessage="error getting character information: Database request failed";
+							console.log($scope.errorMessage);
+							loading=false;
+						});
 						$scope.isLoggedIn = true;
-					}
-					loading = false;
+					})
+					.error(function(){
+						$scope.errorMessage="error creating new character: Database request failed";
+						console.log($scope.errorMessage);
+						loading=false;
+					});
 				})
 				.error(function(){
 					$scope.errorMessage="error loading users: Database request failed - couldn't add user";
+					console.log($scope.errorMessage);
 					loading=false;
 				});
                 }
@@ -291,6 +319,8 @@ function GameStateCtrl($scope,gameStateApi){
 	$scope.grade3=datapacket.grade3;
 	$scope.grade4=datapacket.grade4;
 	$scope.stress=datapacket.Stress;
+	   console.log($scope.stress);
+	   console.log("hey: "+datapacket.Stress);
    }
 
    function getNewEvent(weeksCount, eventCount) {
@@ -410,7 +440,6 @@ function GameStateCtrl($scope,gameStateApi){
    getFreeEvents(); 
    getNewEvent($scope.currentWeek, $scope.numberOfEvents);
    //getStatsPacket();
-   hbfu();
 }
 function gameStateApi($http,apiUrl){
   	return{
@@ -436,6 +465,18 @@ function gameStateApi($http,apiUrl){
 		},
 		login: function(username, password) {
 			var url = apiUrl + '/login?username='+username+'&password='+password;
+			return $http.get(url);
+		},
+		checkName: function(username){
+			var url = apiUrl + '/checkName?username='+username;
+			return $http.get(url);
+		},
+		addNewUser: function(username, password){
+			var url = apiUrl + '/addNewUser?username='+username+'&password='+password;
+			return $http.get(url);
+		},
+		newCharacter: function(userID, firstname, lastname, overwrite){
+			var url = apiUrl + '/newCharacter?IDNumber='+userID+'&Firstname='+firstname+'&Lastname='+lastname+'&Overwrite='+overwrite;
 			return $http.get(url);
 		},
 		updateDatabase: function(userID, dayOfTheWeek, funFact, knowledge, commitProficiency, codeQuality, maxEnergy, googleProficiency,
