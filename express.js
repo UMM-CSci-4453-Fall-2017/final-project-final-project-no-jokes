@@ -91,9 +91,9 @@ app.get("/newCharacter",function(req,res){
 	        function(callback){
 
 			if(Overwrite == 0){
-				sql = 'insert into XaiMarsh.fp_world_state values ('+IDNumber+', '+Firstname+', '+Lastname+', 0)';
+				sql = 'insert into XaiMarsh.fp_world_state values ('+IDNumber+', "'+Firstname+'", "'+Lastname+'", 0)';
 			} else {
-				sql = 'update XaiMarsh.fp_world_state set Firstname = '+Firstname+', Lastname = '+Lastname+', Dotw = 0 where IDNumber = '+IDNumber;
+				sql = 'update XaiMarsh.fp_world_state set Firstname = "'+Firstname+'", Lastname = "'+Lastname+'", Dotw = 0 where IDNumber = '+IDNumber;
 			}
         	        connection.query(sql, function(err,row,fields){
                 	        if(err){console.log("We have an error:");
