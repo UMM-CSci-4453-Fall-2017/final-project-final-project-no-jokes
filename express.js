@@ -207,7 +207,7 @@ app.get("/world_state",function(req,res){
 });
 
 app.get("/classEvents",function(req,res){
-  var sql = 'SELECT eventID,classID FROM XaiMarsh.fp_class_events';
+  var sql = 'SELECT eventID FROM XaiMarsh.fp_class_events';
      connection.query(sql,(function(res){return function(err,rows,fields){
      if(err){console.log("We have an error:");
              console.log(err);}
@@ -224,23 +224,23 @@ app.get("/freeEvents",function(req,res){
   }})(res));
 });
 
-app.get("/chanceClassEvents",function(req,res){
-  var sql = 'SELECT eventID,classID FROM XaiMarsh.fp_chance_class_events';
-     connection.query(sql,(function(res){return function(err,rows,fields){
-     if(err){console.log("We have an error:");
-             console.log(err);}
-     res.send(rows);
-  }})(res));
-});
+//app.get("/chanceClassEvents",function(req,res){
+//  var sql = 'SELECT eventID,classID FROM XaiMarsh.fp_chance_class_events';
+//     connection.query(sql,(function(res){return function(err,rows,fields){
+//     if(err){console.log("We have an error:");
+//             console.log(err);}
+//     res.send(rows);
+//  }})(res));
+//});
 
-app.get("/chanceFreeEvents",function(req,res){
-  var sql = 'SELECT eventID FROM XaiMarsh.fp_chance_free_events';
-     connection.query(sql,(function(res){return function(err,rows,fields){
-     if(err){console.log("We have an error:");
-             console.log(err);}
-     res.send(rows);
-  }})(res));
-});
+//app.get("/chanceFreeEvents",function(req,res){
+//  var sql = 'SELECT eventID FROM XaiMarsh.fp_chance_free_events';
+//     connection.query(sql,(function(res){return function(err,rows,fields){
+//     if(err){console.log("We have an error:");
+//             console.log(err);}
+//     res.send(rows);
+//  }})(res));
+//});
 
 
 app.get("/login", function(req, res) {
