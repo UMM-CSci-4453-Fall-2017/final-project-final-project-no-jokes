@@ -20,13 +20,13 @@
            		<div class="middlepane-image">Images</div>
 			<div class="middlepane-text">{{eventText}}</div>
 	   	 	<div class="middlepane-options">
-				<input type ="radio" id="1" ng-if"choice1 != '-1'"> <label for="1"> {{choice1}}</label>
+				<button type ="button" id="1" ng-click="selectEventChoice($event)"; ng-if="choice1 != '-1'"> 1.  </button > <label for="1" ng-if="choice1 != '-1'"> {{choice1}}</label>
 				<br>
-				<input type ="radio" id="2" ng-if"choice1 != '-1'"> <label for="2"> {{choice2}}</label>
+				<button type ="button" id="2" ng-click="selectEventChoice(id)"; ng-if="choice2 != '-1'"> 2.  </button > <label for="2" ng-if="choice2 != '-1'"> {{choice2}}</label>
 				<br>
-				<input type ="radio" id="3" ng-if"choice1 != '-1'"> <label for="3"> {{choice3}}</label>
+				<button type ="button" id="3" ng-click="selectEventChoice(id)"; ng-if="choice3 != '-1'"> 3.  </button > <label for="3" ng-if="choice3 != '-1'"> {{choice3}}</label>
 				<br>
-				<input type ="radio" id="4" ng-if"choice1 != '-1'"> <label for="4"> {{choice4}}</label>
+				<button type ="button" id="4" ng-click="selectEventChoice(id)"; ng-if="choice4 != '-1'"> 4.  </button > <label for="4" ng-if="choice4 != '-1'"> {{choice4}}</label>
 			</div>
 		</div>
 
