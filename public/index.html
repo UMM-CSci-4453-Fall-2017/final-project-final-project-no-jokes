@@ -17,7 +17,9 @@
 				<div class="toppane-six">Google Proficiency: <b>{{googleProficiency}}</b></div>
 				<div class="toppane-seven">Stress: <b>{{stress}}</b></div>		
 	    		</div>
-           		<div class="middlepane-image">Images</div>
+           		<div class="middlepane-image fill">
+				
+			</div>
 			<div class="middlepane-text">{{eventText}}</div>
 	   	 	<div class="middlepane-options">
 				<button type ="button" id="1" ng-click="selectEventChoice($event)"; ng-if="choice1 != '-1'"> 1.  </button > <label for="1" ng-if="choice1 != '-1'"> {{choice1}}</label>
@@ -31,15 +33,47 @@
 		</div>
 
 		<div class="container" ng-if="!isLoggedIn">
-			Username: {{username}} <br>
+			<h3>Login</h3><br>
+			Username: <br>
                         <input type="text" ng-model='username'>
                         <br>
                      Password:<br>
-                         <input type="text" ng-model='password'>
+                         <input type="password" ng-model='password'>
                          <br>
 			 <button type="button" id="-1" ng-click="login(username, password);"> Log In </button>
-			 <button type="button" id="-2" ng-click="addNewUser(username, password);"> Add New User </button>
+			 <br>
+			 <br>
+			 <h3>Create New Character</h3>
+                        Username: <br>
+                        <input type="text" ng-model='newUsername'>
+                        <br>
+                     Password:<br>
+                         <input type="password" ng-model='newPassword'>
+                         <br>
+
+			 First name:<br>
+                         <input type="text" ng-model='newFirstname'>
+                         <br>
+
+			 Last name:<br>
+                         <input type="text" ng-model='newLastname'>
+                         <br>
+
+                         <button type="button" id="-2" ng-click="addNewUser(newUsername, newPassword, newFirstname, newLastname);"> Add New User </button>
+
 		</div>
+
+
+
+
+
+
+
+
+
+
+
+
 	</body>
 
 <style>
@@ -61,6 +95,11 @@
     background-color: royalblue;
     border-collapse: collapse;
     
+}
+
+.fill img {
+    max-width: 100%;
+    max-height: 100%
 }
 
 .middlepane-text {
