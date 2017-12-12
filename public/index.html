@@ -17,11 +17,8 @@
 				<div class="toppane-six">Google Proficiency: <b>{{googleProficiency}}</b></div>
 				<div class="toppane-seven">Stress: <b>{{stress}}</b></div>		
 	    		</div>
-           		<div class="middlepane-image fill">
-				
-			</div>
-			<div class="middlepane-text">{{eventText}}</div>
-	   	 	<div class="middlepane-options">
+			<div class="middlepane-text"><b>{{eventText}}</b>
+				<br>
 				<button type ="button" id="1" ng-click="selectEventChoice($event)"; ng-if="choice1 != '-1'"> 1.  </button > <label for="1" ng-if="choice1 != '-1'"> {{choice1}}</label>
 				<br>
 				<button type ="button" id="2" ng-click="selectEventChoice($event)"; ng-if="choice2 != '-1'"> 2.  </button > <label for="2" ng-if="choice2 != '-1'"> {{choice2}}</label>
@@ -98,71 +95,76 @@
 }
 
 .fill img {
-    max-width: 100%;
-    max-height: 100%
+    min-width: 100%;
+    max-height: 100%;
 }
 
 .middlepane-text {
     width: 100%;
-    height: 25%;
+    height: 90%;
     float: left;
-    background-color: red;
+    background-color: #750022;
+    color: #f6bf64;
     border-collapse: collapse;
+    font-size: xx-large;
 }
 
 .middlepane-options {
     width: 100%;
-    height: 30%;
+    height: 45%;
     float: left;
-    background-color: green;
+    background-color: #1ac6ff;
     border-collapse: collapse;
+    font-size: large;
 }
 
 .toppane {
   width: 100%;
-  height: 5%;
+  height: 10%;
   border-collapse: collapse;
-  background-color: #4da6ff;
+  background-color: #f6bf64;
+  color: #750022;
+  font-size: x-large;
 }
 
 .toppane-name {
-	width: 23%;
+	width: 16%;
 	float: left;
 	height: 100%;
 }
 .toppane-one {
-	width: 11%;
-	right: 23%;
+	width: 10%;
+	right: 16%;
 	float: left;
 }
 .toppane-two {
-        width: 11%;
-        right: 34%;
+        width: 12%;
+        right: 26%;
         float: left;
 }
 .toppane-three {
-        width: 11%;
-        right: 45%;
+        width: 14%;
+        right: 38%;
         float: left;
 }
 .toppane-four {
-        width: 11%;
-        right: 56%;
+        width: 12%;
+        right: 52%;
         float: left;
 }
 .toppane-five {
-        width: 11%;
-        right: 67%;
+        width: 12%;
+        right: 64%;
         float: left;
 }
 .toppane-six {
-        width: 11%;
-        right: 78%;
+        width: 15%;
+        right: 76%;
         float: left;
 }
 .toppane-seven {
-        width: 11%;
-        right: 89%;
+        width: 9%;
+        right: 91%;
         float: left;
 }
 .toppane-border {
