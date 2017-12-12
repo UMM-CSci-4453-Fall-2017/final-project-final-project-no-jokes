@@ -1,0 +1,11 @@
+Marshall Hoffmann, Xaitheng Yang
+Professor Peter Dolan
+CSCI 4453
+12 December 2017
+Final Summary: Group Portion
+	Our final project aimed to create a text based game using techniques we learned in class to use a mariaDB database. This was to be done by using the database to store game information, including text for events, user information, and character information for each user. In addition to this, an HTML and Javascript portion was to be created that would act as a user interface.
+	The data we stored in the database took two main forms. Things relating to the user, and things not relating to the user. Things relating to the user were stored in different tables for ease of use, but were kept together using an ID number (IDNumber in the tables) as a foreign key to link everything together. Things not relating to the user were events. These were stored in three tables with the same structure (eventID, eventText, buttons, results, relevantStat). The eventID was used as a primary key for the table, eventText stored the text that would be displayed, the 4 button fields contained text (if any) that would be displayed as an option for the user. The 4 results fields stored eventID’s of other events that would follow from the current event if the corresponding button was clicked.The relevantStat column was used for chance events, and identified which stat would be used in calculating success or failure. All of these columns if unused would hold a -1 as a value to avoid nulls.
+We are fairly satisfied with what we have achieved. We created a fully functional game, and had fun doing it. Some goals we didn’t achieve was pictures, we wanted pictures for each event to give a better feel of the event you were participating in.
+Our project has a lot of room for expansion and improvements. One example is our events, as you can write more free events infinitely, but class events would include changing either how many days the game goes through, or our function that determines what class event is shown.
+Overall we both had a lot of fun. It was a cool experience bouncing back between each other with one working primarily on back-end, and one working on the front-end. Also, creating events was fun, thinking about some of the things we have experienced this semester, and previous semesters, and mostly just goofing around with them.
+
