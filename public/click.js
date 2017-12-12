@@ -7,16 +7,14 @@ function GameStateCtrl($scope,gameStateApi){
 
    $scope.classEvents=[]; //Stores eventID for the corresponding
    $scope.freeEvents=[];  //Event in the database
-//   $scope.chanceClassEvents=[];
-//   $scope.chanceFreeEvents=[];
+
+
    $scope.currentClassEvent=1;
    $scope.numberOfEvents=0;
    $scope.currentDay=1;
    $scope.username;
    $scope.password;
-   //$scope.newCharacter=-1; //0 means they choose to login, 1 means they choose to make a new character
    $scope.characterInformation;
-   //$scope.characterInventory=characterInventory;
    $scope.currentEvent;
    $scope.userID=-1;
    $scope.isLoggedIn=false;
@@ -49,11 +47,11 @@ function GameStateCtrl($scope,gameStateApi){
     	return loading;
    }
 
+   //Fills the array classEvents with eventID's that correspond to database events
    function getClassEvents() {
 	loading=true;
 	$scope.errorMessage='';
 
-	console.log("current class event number "+$scope.currentClassEvent);
 	gameStateApi.getClassEvents()
 	   .success(function(data) {
 		   $scope.classEvents=data;
@@ -65,18 +63,15 @@ function GameStateCtrl($scope,gameStateApi){
 	   });
    }
 
+   //Gets the next classEvents, calls the route getCurrentClassEvent that gives you a datapacket of the event, and then saves that datapacket into individual variables
    function getCurrentClassEvent(){
         loading=true;
         $scope.errorMessage='';
-
-	   console.log("current class event number in getccevent function "+$scope.currentClassEvent);
-
 	eventID = $scope.currentClassEvent;
 	$scope.currentClassEvent++;
 
         gameStateApi.getCurrentClassEvent(eventID)
            .success(function(data) {
-		   console.log("success");
                    $scope.currentEvent=data;
 		   getPrintVariables(data);
                    loading=false;
@@ -87,6 +82,7 @@ function GameStateCtrl($scope,gameStateApi){
            });
    }
 
+   //Fills the array freeEvents with eventID's that correspond to database events
    function getFreeEvents() {
         loading=true;
         $scope.errorMessage='';
@@ -100,15 +96,16 @@ function GameStateCtrl($scope,gameStateApi){
                    loading=false;
            });
    }
-
+   
+   //Gets the next freeEvent, calls the route getCurrentFreeEvent that gives you a datapacket of the event, and then saves that datapacket into individual variables
    function getCurrentFreeEvent(){
 	loading=true;
 	$scope.errorMessage='';
 	var eventID = getRandomInt(1, $scope.freeEvents.length);
-	   console.log("eventID from rand: " + eventID);
+
 	gameStateApi.getCurrentFreeEvent(eventID)
 	   .success(function(data) {
-		   console.log("getCurrentFreeEvent success");
+
 		   $scope.currentEvent=data;
 		   	getPrintVariables(data);
 		   loading=false;
@@ -119,8 +116,9 @@ function GameStateCtrl($scope,gameStateApi){
 	   });
    }
 
+   //Takes in a datapacket, and saves the data into individual variables of the text, and choices
    function getPrintVariables(data) {
-	console.log(data[0]);
+
 	   $scope.eventText = data[0].eventText;
 	$scope.choice1 = data[0].button1;
 	$scope.choice2 = data[0].button2;
@@ -132,13 +130,14 @@ function GameStateCtrl($scope,gameStateApi){
 	$scope.result4 = data[0].result4;
    }
 
-   //Thanks internet
+   //gets random number from min to max, credit to internet on this one.
    function getRandomInt(min, max) {
  	min = Math.ceil(min);
   	max = Math.floor(max);
   	return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+   //takes in a userID, and queries the database for that characters stats, and then gives you a new event
    function getCharacterInformation(userID) {
 	loading=true;
 	$scope.errorMessage='';
@@ -154,6 +153,7 @@ function GameStateCtrl($scope,gameStateApi){
 	   });
    }
 
+   //Takes in a username and password, and logs the user in if it matches something in the database
    function login(username, password) {
 	$scope.errorMessage='';
 	loading = true; 
@@ -164,11 +164,8 @@ function GameStateCtrl($scope,gameStateApi){
 	  .success(function(data){
 		if(data.length == 1){
 			$scope.userID=data[0].IDNumber;
-			console.log("userIDee: "+$scope.userID);
 			$scope.isLoggedIn = true;
 			getCharacterInformation($scope.userID);
-			console.log("login getEvent: " + $scope.currentDay + " fjdjl "+$scope.numberOfEvents);
-	
 			loading = false;
 		}
 	  })
@@ -182,7 +179,7 @@ function GameStateCtrl($scope,gameStateApi){
 	  }
    }
 
-
+   //Creates a new user it doesn't already exist in the database
    function addNewUser(username, password, firstname, lastname){
 	  $scope.errorMessage='';
 	  loading = true;
@@ -193,46 +190,32 @@ function GameStateCtrl($scope,gameStateApi){
 
 	gameStateApi.checkName($scope.username)
           .success(function(data){
-		console.log("before if: "+ data.length);
+
                 if(data.length == 0){
-			console.log("got in if");
+
 			gameStateApi.addNewUser($scope.username, $scope.password)
 				.success(function(data){
-					console.log(data[0].IDNumber);
+
 					$scope.userID = data[0].IDNumber;
-					console.log($scope.userID);
+
 					gameStateApi.newCharacter($scope.userID, $scope.firstname, $scope.lastname, 0)
 					.success(function(data) {
-						console.log("passed newCharacter");
-						//gameStateApi.getCharacterInformation($scope.userID)
-						//.success(function(data){
-				//			saveStats(data[0]);
-				//			loading=false;
-				//		})
-				//		.error(function(){
-				//			$scope.errorMessage="error getting character information: Database request failed";
-				//			console.log($scope.errorMessage);
-				//			loading=false;
-				//		});
 						getCharacterInformation($scope.userID);
 						$scope.isLoggedIn = true;
 						//getNewEvent($scope.currentDay, $scope.numberOfEvents);
 					})
 					.error(function(){
 						$scope.errorMessage="error creating new character: Database request failed";
-						console.log($scope.errorMessage);
 						loading=false;
 					});
 				})
 				.error(function(){
 					$scope.errorMessage="error loading users: Database request failed - couldn't add user";
-					console.log($scope.errorMessage);
 					loading=false;
 				});
                 }
           })
           .error(function(){
-
                 $scope.errorMessage="error loading users: Database request failed - couldn't check username";
                   loading = false;
           });
@@ -246,28 +229,28 @@ function GameStateCtrl($scope,gameStateApi){
                 }
         }
    }
+
+  //Takes in a block of text, and takes only the string until it reaches key letter '@'
   function getSuccessChanceEvent(fullEventText){
         var location = getIndexof(fullEventText, "@");
-
         $scope.eventText = fullEventText.substring(0,location);
-	console.log("success " + $scope.eventText);
+
    }
 
+   //Takes in a block of text, and takes only the string after key letter '@'
    function getFailChanceEvent(fullEventText){
         var location = getIndexof(fullEventText, "@");
-
         $scope.eventText = fullEventText.substring(location+1, fullEventText.length);
-	console.log("fail " + $scope.eventText);
+
    }
 
-	//Write helper function that does the scanning (pass in button1, button2 etc depending on $event)
+   //Takes in an event (number based on your choice 1-4), and calls the resultEvent of that choice
+	//Then increments how many events happened in that day
    function selectEventChoice($event) {
-	console.log("it got in selectEChoice");
 	$scope.errorMessage='';
 	loading = true;
 	if ($event.target.id == 1) {
 		checkForIncreaseStat($scope.choice1);
-		console.log($scope.result1);
 		gameStateApi.getResultEvent($scope.result1)
 		.success(function(data){
 			$scope.currentEvent=data;
@@ -360,19 +343,14 @@ function GameStateCtrl($scope,gameStateApi){
         }	
    }
    
-   //Checks the result string to see if it contains the name of one of the stats so it can increment it
-   //function resultContainsStat(string) {
-//
-   //}
+
+
+
+
 
    function saveStats(datapacket) {
-	   console.log("idnumber is: "+$scope.userID);
-		console.log("saveStats datapacket: " + datapacket);
-		console.log("knowledge from datpacket: " + datapacket.Knowledge);
-//	$scope.userID=datapacket.IDNumber;
 	$scope.funFact=datapacket.FunFact;
 	$scope.knowledge=datapacket.Knowledge;
-	console.log("knowledge from scope: " + $scope.knowledge);
 	$scope.commitProficiency=datapacket.CommitProficiency;
 	$scope.codeQuality=datapacket.CodeQuality;
 	$scope.maxEnergy=datapacket.MaxEnergy;
@@ -382,7 +360,6 @@ function GameStateCtrl($scope,gameStateApi){
 	$scope.grade3=datapacket.grade3;
 	$scope.grade4=datapacket.grade4;
 	$scope.stress=datapacket.Stress;
-	   console.log("Day of the week: "+datapacket.Dotw);
 	$scope.currentDay=datapacket.Dotw;
 	$scope.firstname=datapacket.Firstname;
 	$scope.lastname=datapacket.Lastname;
@@ -396,9 +373,9 @@ function GameStateCtrl($scope,gameStateApi){
    }
 
    function getNewEvent(dayCount, eventCount) {
-	   console.log("it got into getNewEvent" + dayCount + "now eventCount:" + eventCount);
+	
 	   if(eventCount == 5 && dayCount < 5) {
-		   console.log("its about to updateDatabase with stress = "+$scope.stress);
+		  
 		   $scope.currentDay++;
 		   //userID, dayOfTheWeek, funFact, knowledge, commitProficiency, codeQuality, maxEnergy, googleProficiency,grade1, grade2, grade3, grade4, stress
 		   gameStateApi.updateDatabase($scope.userID, $scope.currentDay, $scope.funFact, $scope.knowledge, $scope.commitProficiency, $scope.codeQuality, $scope.maxEnergy, $scope.googleProficiency, $scope.grade1, $scope.grade2, $scope.grade3, $scope.grade4, $scope.stress) 
@@ -406,7 +383,6 @@ function GameStateCtrl($scope,gameStateApi){
 			$scope.numberOfEvents=0;
 			alert("On to day " + $scope.currentDay);
 			getNewEvent($scope.currentDay, $scope.numberOfEvents);
-			   console.log("about to reset events to 0");
 			   $scope.numberOfEvents=0;
 			   loading=false;
 		   })
@@ -418,7 +394,7 @@ function GameStateCtrl($scope,gameStateApi){
 		getGrades();
 	   }
 	   else if(eventCount%2 == 0 && dayCount%2 == 1) {
-		console.log("it got into the right place");
+	
 		getCurrentClassEvent();
 		eventCount++;
 	   }
@@ -427,7 +403,7 @@ function GameStateCtrl($scope,gameStateApi){
 		eventCount++;
            }
 	   else if (eventCount%2 == 1 && dayCount%2 == 1) {
-		console.log("it should be here now");
+		
 		getCurrentFreeEvent();
 		eventCount++;
 	   }
@@ -598,7 +574,7 @@ function gameStateApi($http,apiUrl){
 			return $http.get(url);
 		},
 		updateDatabase: function(userID, dayOfTheWeek, funFact, knowledge, commitProficiency, codeQuality, maxEnergy, googleProficiency,grade1, grade2, grade3, grade4, stress) {
-			console.log("It's sending stress ="+stress);
+		
 			var url = apiUrl + '/updateDatabase?IDNumber='+userID+'&Dotw='+dayOfTheWeek+'&FunFact='+funFact+'&Knowledge='+knowledge+'&CommitProficiency='+commitProficiency+'&CodeQuality='+codeQuality+'&MaxEnergy='+maxEnergy+'&GoogleProficiency='+googleProficiency+'&grade1='+grade1+'&grade2='+grade2+'&grade3='+grade3+'&grade4='+grade4+'&Stress='+stress;
 			return $http.get(url);
 		}
