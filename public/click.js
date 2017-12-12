@@ -204,18 +204,19 @@ function GameStateCtrl($scope,gameStateApi){
 					gameStateApi.newCharacter($scope.userID, $scope.firstname, $scope.lastname, 0)
 					.success(function(data) {
 						console.log("passed newCharacter");
-						gameStateApi.getCharacterInformation($scope.userID)
-						.success(function(data){
-							saveStats(data[0]);
-							loading=false;
-						})
-						.error(function(){
-							$scope.errorMessage="error getting character information: Database request failed";
-							console.log($scope.errorMessage);
-							loading=false;
-						});
+						//gameStateApi.getCharacterInformation($scope.userID)
+						//.success(function(data){
+				//			saveStats(data[0]);
+				//			loading=false;
+				//		})
+				//		.error(function(){
+				//			$scope.errorMessage="error getting character information: Database request failed";
+				//			console.log($scope.errorMessage);
+				//			loading=false;
+				//		});
+						getCharacterInformation($scope.userID);
 						$scope.isLoggedIn = true;
-						getNewEvent($scope.currentDay, $scope.numberOfEvents);
+						//getNewEvent($scope.currentDay, $scope.numberOfEvents);
 					})
 					.error(function(){
 						$scope.errorMessage="error creating new character: Database request failed";
